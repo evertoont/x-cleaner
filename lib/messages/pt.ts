@@ -116,6 +116,8 @@ export const pt: Messages = {
     cancel: 'Cancelar',
     technicalDetails: 'Detalhes técnicos',
     keepTabsOpen: 'Deixe este painel e a aba do X abertos até terminar: os itens são removidos por eles.',
+    keepXTabOpen:
+      'Pode fechar este painel: a remoção continua em segundo plano. Deixe a aba do X aberta até terminar.',
   },
   removal: {
     button: {
@@ -145,9 +147,9 @@ export const pt: Messages = {
   },
   confirmDialog: {
     title: (count: number) => `Remover ${countOf(count, 'item', 'itens')}?`,
-    duration: (duration: string) =>
-      `Leva cerca de ${duration}. Deixe este painel e a aba do X abertos até terminar.`,
+    duration: (duration: string) => `Leva cerca de ${duration}. Deixe a aba do X aberta até terminar.`,
     irreversible: 'Não dá para reverter.',
+    backgroundRun: 'Continuar mesmo se eu fechar este painel',
   },
   activity: {
     openingX: 'Abrindo o X…',
@@ -170,6 +172,8 @@ export const pt: Messages = {
     capturing: (kindLabel: string) => `X Cleaner · capturando ${kindLabel}…`,
     stopping: 'X Cleaner · parando…',
     stop: 'Parar captura',
+    removing: (progress: string) => `X Cleaner · ${progress}`,
+    stopRemoval: 'Parar',
   },
   progress: {
     capturing: 'Capturando',

@@ -1,13 +1,15 @@
 import { TriangleAlert } from 'lucide-react'
 import { useEffect, useRef } from 'react'
-import type { MouseEvent } from 'react'
+import type { ChangeEvent, MouseEvent } from 'react'
+import { useStoredValue } from '../hooks/use-stored-value'
 import { messages } from '../lib/i18n'
+import { backgroundRunPreferenceStorage } from '../lib/item-storage'
 import type { RemovalPresentation } from './removal-presentations'
 
 interface ConfirmRemovalDialogProps {
   isOpen: boolean
   presentation: RemovalPresentation
-  onConfirm: () => void
+  onConfirm: (isBackgroundRun: boolean) => void
   onCancel: () => void
 }
 
@@ -16,6 +18,8 @@ export function ConfirmRemovalDialog(props: ConfirmRemovalDialogProps) {
   const { buttonLabel, buttonIcon: ButtonIcon, dialogTitle, dialogLines, dialogNotes, dialogWarning } =
     presentation
   const dialogRef = useRef<HTMLDialogElement>(null)
+  const { value: isBackgroundRunPreferred, saveValue: saveBackgroundRunPreference } =
+    useStoredValue(backgroundRunPreferenceStorage)
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -40,6 +44,10 @@ export function ConfirmRemovalDialog(props: ConfirmRemovalDialogProps) {
     }
 
     onCancel()
+  }
+
+  function handleBackgroundRunChange(event: ChangeEvent<HTMLInputElement>) {
+    saveBackgroundRunPreference(event.target.checked)
   }
 
   return (
@@ -81,11 +89,24 @@ export function ConfirmRemovalDialog(props: ConfirmRemovalDialogProps) {
           </p>
         )}
 
+        <label className="confirm-dialog-option">
+          <input
+            type="checkbox"
+            checked={isBackgroundRunPreferred}
+            onChange={handleBackgroundRunChange}
+          />
+          {messages.confirmDialog.backgroundRun}
+        </label>
+
         <div className="confirm-dialog-buttons">
           <button type="button" className="button button-quiet" onClick={onCancel}>
             {messages.toolbar.cancel}
           </button>
-          <button type="button" className="button button-danger" onClick={onConfirm}>
+          <button
+            type="button"
+            className="button button-danger"
+            onClick={() => onConfirm(isBackgroundRunPreferred)}
+          >
             <ButtonIcon size={16} strokeWidth={1.75} aria-hidden />
             {buttonLabel}
           </button>

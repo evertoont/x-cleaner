@@ -39,24 +39,38 @@ const OVERLAY_STYLES = `
   }
 `
 
-export function showCaptureOverlay(sectionLabel: string, onStop: () => void): () => void {
+export interface PageOverlay {
+  updateMessage: (message: string) => void
+  remove: () => void
+}
+
+interface PageOverlayOptions {
+  message: string
+  stopLabel: string
+  onStop: () => void
+}
+
+export function showPageOverlay(options: PageOverlayOptions): PageOverlay {
+  const { message, stopLabel, onStop } = options
   const overlayHost = document.createElement('div')
   const shadowRoot = overlayHost.attachShadow({ mode: 'closed' })
   const styleElement = document.createElement('style')
   const overlayElement = document.createElement('div')
   const messageElement = document.createElement('span')
   const stopButton = document.createElement('button')
+  let isStopping = false
 
   styleElement.textContent = OVERLAY_STYLES
   overlayElement.className = 'overlay'
   messageElement.setAttribute('role', 'status')
-  messageElement.textContent = messages.overlay.capturing(sectionLabel)
+  messageElement.textContent = message
   stopButton.type = 'button'
-  stopButton.textContent = messages.overlay.stop
+  stopButton.textContent = stopLabel
 
   stopButton.addEventListener(
     'click',
     () => {
+      isStopping = true
       stopButton.disabled = true
       messageElement.textContent = messages.overlay.stopping
       onStop()
@@ -68,5 +82,24 @@ export function showCaptureOverlay(sectionLabel: string, onStop: () => void): ()
   shadowRoot.append(styleElement, overlayElement)
   document.documentElement.append(overlayHost)
 
-  return () => overlayHost.remove()
+  return {
+    updateMessage: nextMessage => {
+      if (isStopping) {
+        return
+      }
+
+      messageElement.textContent = nextMessage
+    },
+    remove: () => overlayHost.remove(),
+  }
+}
+
+export function showCaptureOverlay(sectionLabel: string, onStop: () => void): () => void {
+  const captureOverlay = showPageOverlay({
+    message: messages.overlay.capturing(sectionLabel),
+    stopLabel: messages.overlay.stop,
+    onStop,
+  })
+
+  return captureOverlay.remove
 }

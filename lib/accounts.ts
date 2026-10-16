@@ -32,6 +32,11 @@ export const PEOPLE_LIST_ACTIONS: Record<PeopleList, AccountAction> = {
   followers: 'removeFollower',
 }
 
+export const ACTION_PEOPLE_LISTS: Record<AccountAction, PeopleList> = {
+  unfollow: 'nonFollowers',
+  removeFollower: 'followers',
+}
+
 export const ACCOUNT_SORTS: AccountSort[] = ['recent', 'mostFollowers', 'fewestFollowers']
 
 export const FOLLOWER_FILTERS: FollowerFilter[] = ['all', 'mutual', 'notFollowedBack']

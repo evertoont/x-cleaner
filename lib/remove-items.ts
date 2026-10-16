@@ -6,8 +6,8 @@ import type { SettledRemoval } from './removal-queue'
 interface RemoveItemsOptions {
   items: CapturedItem[]
   signal: AbortSignal
-  onItemSettled: (item: CapturedItem, removal: SettledRemoval) => void
-  onRateLimited: (resumeAt: Date) => void
+  onItemSettled: (item: CapturedItem, removal: SettledRemoval) => Promise<void>
+  onRateLimited: (resumeAt: Date) => Promise<void>
 }
 
 export function removeItems(options: RemoveItemsOptions): Promise<void> {

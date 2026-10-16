@@ -1,37 +1,20 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback } from 'react'
 import type { Account, PeopleList } from '../lib/accounts'
 import { accountListStorages } from '../lib/item-storage'
+import { useStoredValue } from './use-stored-value'
 
 export function useAccountList(list: PeopleList) {
-  const [accounts, setAccounts] = useState<Account[]>([])
-  const [isLoaded, setIsLoaded] = useState(false)
+  const accountListStorage = accountListStorages[list]
+  const { value: accounts, isLoaded } = useStoredValue(accountListStorage)
 
-  useEffect(() => {
-    void accountListStorages[list].getValue().then(storedAccounts => {
-      setAccounts(storedAccounts)
-      setIsLoaded(true)
-    })
-  }, [list])
+  const replaceAccounts = useCallback(
+    async (updateAccounts: (currentAccounts: Account[]) => Account[]) => {
+      const storedAccounts = await accountListStorage.getValue()
 
-  useEffect(() => {
-    if (!isLoaded) {
-      return
-    }
+      await accountListStorage.setValue(updateAccounts(storedAccounts))
+    },
+    [accountListStorage],
+  )
 
-    void accountListStorages[list].setValue(accounts)
-  }, [accounts, isLoaded, list])
-
-  const removeAccount = useCallback((accountKey: string) => {
-    setAccounts(currentAccounts => currentAccounts.filter(account => account.key !== accountKey))
-  }, [])
-
-  const markAccountFailed = useCallback((accountKey: string, errorMessage: string) => {
-    setAccounts(currentAccounts =>
-      currentAccounts.map(account =>
-        account.key === accountKey ? { ...account, status: 'failed', errorMessage } : account,
-      ),
-    )
-  }, [])
-
-  return { accounts, isLoaded, replaceAccounts: setAccounts, removeAccount, markAccountFailed }
+  return { accounts, isLoaded, replaceAccounts }
 }

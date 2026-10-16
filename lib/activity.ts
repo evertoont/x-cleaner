@@ -17,6 +17,8 @@ export type Activity =
       resumeAt?: Date
     }
 
+export type RemovalActivity = Extract<Activity, { type: 'removing' }>
+
 export interface Notice {
   message: string
   tone: 'info' | 'error'
@@ -53,6 +55,10 @@ export function describeActivity(activity: Activity): string | null {
     return describeCapture(activity.section)
   }
 
+  return describeRemovalActivity(activity)
+}
+
+export function describeRemovalActivity(activity: RemovalActivity): string {
   const progress = describeRemovalProgress(activity.target, activity.completed, activity.total)
   const remainingCount = activity.total - activity.completed
 

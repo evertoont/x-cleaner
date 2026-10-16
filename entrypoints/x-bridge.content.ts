@@ -6,6 +6,7 @@ import type { BridgeRequest, BridgeResponses } from '../lib/bridge-messages'
 import { captureTimeline, detectSession, stopCapture } from '../lib/page-capture'
 import { isGraphqlResponseMessage } from '../lib/page-messages'
 import type { GraphqlResponseMessage } from '../lib/page-messages'
+import { watchRemovalBadge } from '../lib/removal-badge'
 import { requestRemoval } from '../lib/removal-request'
 
 export default defineContentScript({
@@ -33,6 +34,8 @@ export default defineContentScript({
 
       return true
     })
+
+    watchRemovalBadge()
   },
 })
 
@@ -40,6 +43,10 @@ function handleBridgeRequest(
   request: BridgeRequest,
   receivedResponses: GraphqlResponseMessage[],
 ): Promise<BridgeResponses[BridgeRequest['type']]> {
+  if (request.type === 'ping') {
+    return Promise.resolve(true)
+  }
+
   if (request.type === 'detect-handle') {
     return detectSession()
   }

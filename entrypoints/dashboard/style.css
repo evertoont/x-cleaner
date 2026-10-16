@@ -568,6 +568,20 @@ input[type='checkbox']:disabled {
   flex-shrink: 0;
 }
 
+.confirm-dialog-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.confirm-dialog-option:hover {
+  color: var(--text-primary);
+}
+
 .confirm-dialog-buttons {
   display: flex;
   justify-content: flex-end;

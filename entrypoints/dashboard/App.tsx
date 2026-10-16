@@ -12,7 +12,8 @@ import { presentAccountRemoval, presentPostRemoval } from '../../components/remo
 import { useAccountList } from '../../hooks/use-account-list'
 import { useCapturedItems } from '../../hooks/use-captured-items'
 import { useSelection } from '../../hooks/use-selection'
-import { planAccountRemovals, runAccountRemovals } from '../../lib/account-removals'
+import { useStoredValue } from '../../hooks/use-stored-value'
+import { planAccountRemovals } from '../../lib/account-removals'
 import {
   countFollowersByFilter,
   filterFollowers,
@@ -28,12 +29,12 @@ import { CAPTURE_TARGETS, describeCaptureTarget, isItemKind } from '../../lib/ca
 import type { CaptureTarget } from '../../lib/capture-modes'
 import { describeError } from '../../lib/errors'
 import { formatDayAndTime, formatList, messages } from '../../lib/i18n'
+import { removalJobStorage, removalNoticeStorage } from '../../lib/item-storage'
 import { countItemsByKind, mergeItems, replaceItemsOfKinds } from '../../lib/items'
 import type { CapturedItem, ItemKind } from '../../lib/items'
 import type { CaptureResult } from '../../lib/page-capture'
-import type { SettledRemoval } from '../../lib/removal-queue'
-import { describeAccountRemovalOutcome, describeRemovalOutcome } from '../../lib/removal-summary'
-import { removeItems } from '../../lib/remove-items'
+import { clearRemovalNotice, requestRemovalStop, startRemovalJob } from '../../lib/removal-job-control'
+import { createAccountRemovalJob, createItemRemovalJob, toRemovalActivity } from '../../lib/removal-jobs'
 import { focusCurrentTab } from '../../lib/x-tab'
 
 type DashboardView = { type: 'posts'; kind: ItemKind } | { type: 'people'; list: PeopleList }
@@ -43,8 +44,7 @@ type SelectableEntry = Pick<CapturedItem, 'key' | 'status'>
 const EMPTY_ACCOUNTS: Account[] = []
 
 export function App() {
-  const { items, isLoaded: areItemsLoaded, replaceItems, removeItem, markItemFailed } =
-    useCapturedItems()
+  const { items, isLoaded: areItemsLoaded, replaceItems } = useCapturedItems()
   const nonFollowerList = useAccountList('nonFollowers')
   const followerList = useAccountList('followers')
   const postSelection = useSelection()
@@ -54,8 +54,10 @@ export function App() {
   const [captureTargets, setCaptureTargets] = useState<CaptureTarget[]>(CAPTURE_TARGETS)
   const [accountSort, setAccountSort] = useState<AccountSort>('recent')
   const [followerFilter, setFollowerFilter] = useState<FollowerFilter>('all')
-  const [activity, setActivity] = useState<Activity>({ type: 'idle' })
+  const [captureActivity, setCaptureActivity] = useState<Activity>({ type: 'idle' })
   const [notice, setNotice] = useState<Notice | null>(null)
+  const { value: removalJob, isLoaded: isRemovalJobLoaded } = useStoredValue(removalJobStorage)
+  const { value: removalNotice } = useStoredValue(removalNoticeStorage)
   const abortControllerRef = useRef<AbortController | null>(null)
 
   const accountLists = { nonFollowers: nonFollowerList, followers: followerList }
@@ -63,6 +65,8 @@ export function App() {
   const activeKind = activeView.type === 'posts' ? activeView.kind : undefined
   const activeList = activeView.type === 'people' ? activeView.list : undefined
   const activeSelection = activeList ? accountSelections[activeList] : postSelection
+  const activity = removalJob ? toRemovalActivity(removalJob) : captureActivity
+  const displayedNotice = notice ?? removalNotice
   const isBusy = activity.type !== 'idle'
 
   const countsByKind = useMemo(() => countItemsByKind(items), [items])
@@ -116,27 +120,28 @@ export function App() {
 
     abortControllerRef.current = abortController
     setNotice(null)
-    setActivity({ type: 'capturing' })
+    void clearRemovalNotice()
+    setCaptureActivity({ type: 'capturing' })
 
     try {
       const capture = await captureItems(targetsToCapture, abortController.signal, section =>
-        setActivity({ type: 'capturing', section }),
+        setCaptureActivity({ type: 'capturing', section }),
       )
 
-      replaceItems(currentItems =>
+      await replaceItems(currentItems =>
         capture.wasStopped
           ? mergeItems(currentItems, capture.items)
           : replaceItemsOfKinds(currentItems, kindsToCapture, capture.items),
       )
 
       if (targetsToCapture.includes('following')) {
-        nonFollowerList.replaceAccounts(currentAccounts =>
+        await nonFollowerList.replaceAccounts(currentAccounts =>
           combineCapturedAccounts(currentAccounts, capture.nonFollowers, capture.wasStopped),
         )
       }
 
       if (targetsToCapture.includes('followers')) {
-        followerList.replaceAccounts(currentAccounts =>
+        await followerList.replaceAccounts(currentAccounts =>
           combineCapturedAccounts(currentAccounts, capture.followers, capture.wasStopped),
         )
       }
@@ -151,60 +156,20 @@ export function App() {
     } finally {
       abortControllerRef.current = null
       await focusCurrentTab().catch(() => undefined)
-      setActivity({ type: 'idle' })
+      setCaptureActivity({ type: 'idle' })
     }
   }
 
-  async function handleRemovePosts() {
-    const itemsToRemove = selectedItems
-    const abortController = new AbortController()
-    const removedItems: CapturedItem[] = []
-    let failedCount = 0
-
-    const handleItemSettled = (item: CapturedItem, removal: SettledRemoval) => {
-      setActivity(advanceProgress)
-
-      if (removal.status === 'failed') {
-        failedCount += 1
-        markItemFailed(item.key, removal.message)
-        return
-      }
-
-      removedItems.push(item)
-      removeItem(item.key)
-      postSelection.deselectKeys([item.key])
-    }
-
-    abortControllerRef.current = abortController
+  async function handleRemovePosts(isBackgroundRun: boolean) {
     setNotice(null)
-    setActivity({ type: 'removing', target: 'items', completed: 0, total: itemsToRemove.length })
-
-    try {
-      await removeItems({
-        items: itemsToRemove,
-        signal: abortController.signal,
-        onItemSettled: handleItemSettled,
-        onRateLimited: resumeAt => setActivity(current => withResumeAt(current, resumeAt)),
-      })
-
-      setNotice({
-        message: describeRemovalOutcome(
-          countItemsByKind(removedItems),
-          failedCount,
-          abortController.signal.aborted,
-        ),
-        tone: failedCount > 0 ? 'error' : 'info',
-      })
-    } catch (error) {
-      console.error(error)
-      setNotice({ message: describeError(error), tone: 'error' })
-    } finally {
-      abortControllerRef.current = null
-      setActivity({ type: 'idle' })
-    }
+    await startRemovalJob(createItemRemovalJob(selectedItems, isBackgroundRun))
   }
 
-  async function handleRemoveAccounts(list: PeopleList, accountsToRemove: Account[]) {
+  async function handleRemoveAccounts(
+    list: PeopleList,
+    accountsToRemove: Account[],
+    isBackgroundRun: boolean,
+  ) {
     const action = PEOPLE_LIST_ACTIONS[list]
     const plan = await planAccountRemovals(action, accountsToRemove)
 
@@ -216,71 +181,17 @@ export function App() {
       return
     }
 
-    const { removeAccount, markAccountFailed } = accountLists[list]
-    const selection = accountSelections[list]
-    const abortController = new AbortController()
-    let processedCount = 0
-    let failedCount = 0
-
-    const handleAccountSettled = (account: Account, removal: SettledRemoval) => {
-      setActivity(advanceProgress)
-
-      if (removal.status === 'failed') {
-        failedCount += 1
-        markAccountFailed(account.key, removal.message)
-        return
-      }
-
-      processedCount += 1
-      removeAccount(account.key)
-      selection.deselectKeys([account.key])
-    }
-
-    abortControllerRef.current = abortController
     setNotice(null)
-    setActivity({
-      type: 'removing',
-      target: action,
-      completed: 0,
-      total: plan.accountsToProcess.length,
-    })
-
-    try {
-      await runAccountRemovals({
-        action,
-        accounts: plan.accountsToProcess,
-        signal: abortController.signal,
-        onAccountSettled: handleAccountSettled,
-        onRateLimited: resumeAt => setActivity(current => withResumeAt(current, resumeAt)),
-      })
-
-      setNotice({
-        message: describeAccountRemovalOutcome({
-          action,
-          processedCount,
-          failedCount,
-          heldBackCount: plan.heldBackCount,
-          quotaResumeAt: plan.quotaResumeAt,
-          wasStopped: abortController.signal.aborted,
-        }),
-        tone: failedCount > 0 ? 'error' : 'info',
-      })
-    } catch (error) {
-      console.error(error)
-      setNotice({ message: describeError(error), tone: 'error' })
-    } finally {
-      abortControllerRef.current = null
-      setActivity({ type: 'idle' })
-    }
+    await startRemovalJob(createAccountRemovalJob(action, plan, isBackgroundRun))
   }
 
-  function handleRemove() {
+  function handleRemove(isBackgroundRun: boolean) {
     if (activeView.type === 'people') {
-      void handleRemoveAccounts(activeView.list, selectedAccounts)
+      void handleRemoveAccounts(activeView.list, selectedAccounts, isBackgroundRun)
       return
     }
 
-    void handleRemovePosts()
+    void handleRemovePosts(isBackgroundRun)
   }
 
   function handleChangeFollowerFilter(filter: FollowerFilter) {
@@ -293,6 +204,11 @@ export function App() {
   }
 
   function handleStop() {
+    if (removalJob) {
+      void requestRemovalStop()
+      return
+    }
+
     abortControllerRef.current?.abort()
   }
 
@@ -305,7 +221,10 @@ export function App() {
     activeSelection.selectKeys(visibleKeys)
   }
 
-  if (!areItemsLoaded || !nonFollowerList.isLoaded || !followerList.isLoaded) {
+  const isStorageLoaded =
+    areItemsLoaded && nonFollowerList.isLoaded && followerList.isLoaded && isRemovalJobLoaded
+
+  if (!isStorageLoaded) {
     return null
   }
 
@@ -331,8 +250,8 @@ export function App() {
             followers: followerList.accounts.length,
           }}
           selectedCounts={{
-            nonFollowers: nonFollowerSelection.selectedKeys.size,
-            followers: followerSelection.selectedKeys.size,
+            nonFollowers: countSelectedAccounts(nonFollowerList.accounts, nonFollowerSelection.selectedKeys),
+            followers: countSelectedAccounts(followerList.accounts, followerSelection.selectedKeys),
           }}
           onSelectList={list => setActiveView({ type: 'people', list })}
         />
@@ -365,7 +284,8 @@ export function App() {
 
           <ActionBar
             activity={activity}
-            notice={notice}
+            notice={displayedNotice}
+            isRunningInBackground={removalJob?.isBackgroundRun ?? false}
             selectedCount={activeList ? selectedAccounts.length : selectedItems.length}
             unselectedFailedCount={unselectedFailedKeys.length}
             removal={removal}
@@ -432,20 +352,9 @@ function combineCapturedAccounts(
   return wasStopped ? mergeAccounts(currentAccounts, capturedAccounts) : capturedAccounts
 }
 
-function advanceProgress(activity: Activity): Activity {
-  if (activity.type !== 'removing') {
-    return activity
-  }
-
-  return { ...activity, completed: activity.completed + 1, resumeAt: undefined }
-}
-
-function withResumeAt(activity: Activity, resumeAt: Date): Activity {
-  if (activity.type !== 'removing') {
-    return activity
-  }
-
-  return { ...activity, resumeAt }
+// Contas removidas pelo background somem da lista mas podem continuar na seleção; só contam as que ainda existem.
+function countSelectedAccounts(accounts: Account[], selectedKeys: ReadonlySet<string>): number {
+  return accounts.filter(account => selectedKeys.has(account.key)).length
 }
 
 function describeCaptureOutcome(capture: CaptureResult, capturedTargets: CaptureTarget[]): Notice {

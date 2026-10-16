@@ -21,8 +21,8 @@ interface RunAccountRemovalsOptions {
   action: AccountAction
   accounts: Account[]
   signal: AbortSignal
-  onAccountSettled: (account: Account, removal: SettledRemoval) => void
-  onRateLimited: (resumeAt: Date) => void
+  onAccountSettled: (account: Account, removal: SettledRemoval) => Promise<void>
+  onRateLimited: (resumeAt: Date) => Promise<void>
 }
 
 export async function planAccountRemovals(
@@ -55,12 +55,12 @@ export function runAccountRemovals(options: RunAccountRemovalsOptions): Promise<
     interval: ACCOUNT_ACTION_INTERVAL,
     signal,
     buildRequest: account => buildAccountRequest(action, account),
-    onEntrySettled: (account, removal) => {
+    onEntrySettled: async (account, removal) => {
       if (removal.status === 'removed') {
-        void recordAction(action)
+        await recordAction(action)
       }
 
-      onAccountSettled(account, removal)
+      await onAccountSettled(account, removal)
     },
     onRateLimited,
   })

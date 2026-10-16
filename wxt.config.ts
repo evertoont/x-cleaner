@@ -6,7 +6,7 @@ export default defineConfig({
   manifest: {
     name: 'X Cleaner',
     description: 'Review and bulk-remove your own posts, replies, reposts and likes on X.',
-    permissions: ['storage', 'unlimitedStorage'],
+    permissions: ['alarms', 'notifications', 'storage', 'unlimitedStorage'],
     host_permissions: ['https://x.com/*'],
     action: {
       default_title: 'Open X Cleaner',

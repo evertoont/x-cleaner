@@ -5,6 +5,7 @@ import type { CaptureResult, XSession } from './page-capture'
 import type { RemovalResult } from './removal-response'
 
 export type BridgeRequest =
+  | { type: 'ping' }
   | { type: 'detect-handle' }
   | { type: 'capture'; mode: CaptureMode; ownerHandle: string }
   | { type: 'stop-capture' }
@@ -18,6 +19,7 @@ export type RemovalBridgeRequest = Extract<
 >
 
 export interface BridgeResponses {
+  ping: true
   'detect-handle': XSession | null
   capture: CaptureResult
   'stop-capture': true
@@ -27,6 +29,7 @@ export interface BridgeResponses {
 }
 
 const BRIDGE_REQUEST_TYPES: BridgeRequest['type'][] = [
+  'ping',
   'detect-handle',
   'capture',
   'stop-capture',

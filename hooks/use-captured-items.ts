@@ -1,37 +1,19 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback } from 'react'
 import { itemsStorage } from '../lib/item-storage'
 import type { CapturedItem } from '../lib/items'
+import { useStoredValue } from './use-stored-value'
 
 export function useCapturedItems() {
-  const [items, setItems] = useState<CapturedItem[]>([])
-  const [isLoaded, setIsLoaded] = useState(false)
+  const { value: items, isLoaded } = useStoredValue(itemsStorage)
 
-  useEffect(() => {
-    void itemsStorage.getValue().then(storedItems => {
-      setItems(storedItems)
-      setIsLoaded(true)
-    })
-  }, [])
+  const replaceItems = useCallback(
+    async (updateItems: (currentItems: CapturedItem[]) => CapturedItem[]) => {
+      const storedItems = await itemsStorage.getValue()
 
-  useEffect(() => {
-    if (!isLoaded) {
-      return
-    }
+      await itemsStorage.setValue(updateItems(storedItems))
+    },
+    [],
+  )
 
-    void itemsStorage.setValue(items)
-  }, [items, isLoaded])
-
-  const removeItem = useCallback((itemKey: string) => {
-    setItems(currentItems => currentItems.filter(item => item.key !== itemKey))
-  }, [])
-
-  const markItemFailed = useCallback((itemKey: string, errorMessage: string) => {
-    setItems(currentItems =>
-      currentItems.map(item =>
-        item.key === itemKey ? { ...item, status: 'failed', errorMessage } : item,
-      ),
-    )
-  }, [])
-
-  return { items, isLoaded, replaceItems: setItems, removeItem, markItemFailed }
+  return { items, isLoaded, replaceItems }
 }

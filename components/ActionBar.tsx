@@ -10,6 +10,7 @@ import type { RemovalPresentation } from './removal-presentations'
 interface ActionBarProps {
   activity: Activity
   notice: Notice | null
+  isRunningInBackground: boolean
   selectedCount: number
   unselectedFailedCount: number
   removal: RemovalPresentation
@@ -18,7 +19,7 @@ interface ActionBarProps {
   onToggleAllVisible: () => void
   onSelectFailed: () => void
   onClearSelection: () => void
-  onRemove: () => void
+  onRemove: (isBackgroundRun: boolean) => void
   onStop: () => void
 }
 
@@ -26,6 +27,7 @@ export function ActionBar(props: ActionBarProps) {
   const {
     activity,
     notice,
+    isRunningInBackground,
     selectedCount,
     unselectedFailedCount,
     removal,
@@ -48,9 +50,9 @@ export function ActionBar(props: ActionBarProps) {
   const statusTone = activityMessage ? 'info' : notice?.tone
   const announcement = describeActivityAnnouncement(activity) ?? notice?.message
 
-  function handleConfirm() {
+  function handleConfirm(isBackgroundRun: boolean) {
     setIsConfirming(false)
-    onRemove()
+    onRemove(isBackgroundRun)
   }
 
   return (
@@ -119,7 +121,7 @@ export function ActionBar(props: ActionBarProps) {
         {isRemoving && (
           <p className="toolbar-warning" role="alert">
             <TriangleAlert size={16} strokeWidth={2} aria-hidden />
-            {messages.toolbar.keepTabsOpen}
+            {isRunningInBackground ? messages.toolbar.keepXTabOpen : messages.toolbar.keepTabsOpen}
           </p>
         )}
 

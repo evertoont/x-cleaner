@@ -23,6 +23,19 @@ export async function findOrOpenXTab(): Promise<number> {
   return createdTab.id
 }
 
+// Só recarrega a aba quando o X Cleaner ainda não responde nela, para não tirar a pessoa da página que está lendo.
+export async function prepareXTab(): Promise<number> {
+  const tabId = await findOrOpenXTab()
+
+  if (await isBridgeResponsive(tabId)) {
+    return tabId
+  }
+
+  await navigateXTab(tabId, X_HOME_URL)
+
+  return tabId
+}
+
 export async function navigateXTab(tabId: number, url: string): Promise<void> {
   const tabLoaded = waitForTabLoad(tabId)
 
@@ -68,6 +81,12 @@ export async function sendBridgeRequest<Request extends BridgeRequest>(
   }
 
   return response
+}
+
+function isBridgeResponsive(tabId: number): Promise<boolean> {
+  return sendBridgeRequest(tabId, { type: 'ping' })
+    .then(() => true)
+    .catch(() => false)
 }
 
 function waitForTabLoad(tabId: number): Promise<void> {

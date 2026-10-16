@@ -114,6 +114,8 @@ export const en = {
     cancel: 'Cancel',
     technicalDetails: 'Technical details',
     keepTabsOpen: 'Keep this tab and the X tab open until it finishes: items are removed through them.',
+    keepXTabOpen:
+      'You can close this tab: removal keeps going in the background. Keep the X tab open until it finishes.',
   },
   removal: {
     button: {
@@ -143,9 +145,9 @@ export const en = {
   },
   confirmDialog: {
     title: (count: number) => `Remove ${countOf(count, 'item', 'items')}?`,
-    duration: (duration: string) =>
-      `Takes about ${duration}. Keep this tab and the X tab open until it finishes.`,
+    duration: (duration: string) => `Takes about ${duration}. Keep the X tab open until it finishes.`,
     irreversible: "This can't be undone.",
+    backgroundRun: 'Keep going if I close this tab',
   },
   activity: {
     openingX: 'Opening X…',
@@ -168,6 +170,8 @@ export const en = {
     capturing: (kindLabel: string) => `X Cleaner · fetching ${kindLabel}…`,
     stopping: 'X Cleaner · stopping…',
     stop: 'Stop fetching',
+    removing: (progress: string) => `X Cleaner · ${progress}`,
+    stopRemoval: 'Stop',
   },
   progress: {
     capturing: 'Fetching',
