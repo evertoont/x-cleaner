@@ -1,13 +1,14 @@
+import type { Account } from './accounts'
+import { CAPTURE_MODE_TARGET, CAPTURE_MODES } from './capture-modes'
+import type { CaptureMode, CaptureTarget } from './capture-modes'
 import { XNotLoggedInError } from './errors'
 import { dedupeItems } from './items'
-import type { CapturedItem, ItemKind } from './items'
+import type { CapturedItem } from './items'
 import type { CaptureResult, XSession, XWebApp } from './page-capture'
-import { CAPTURE_MODE_KIND } from './timeline-parser'
-import type { CaptureMode } from './timeline-parser'
 import { findOrOpenXTab, focusTab, navigateXTab, sendBridgeRequest, X_HOME_URL } from './x-tab'
 
 export interface CaptureSection {
-  kind: ItemKind
+  target: CaptureTarget
   step: number
   totalSteps: number
 }
@@ -16,8 +17,6 @@ type SectionUrlBuilder = (ownerHandle: string) => string
 
 type SectionStartHandler = (section: CaptureSection) => void
 
-const CAPTURE_MODES: CaptureMode[] = ['posts', 'replies', 'reposts', 'likes']
-
 // Os dois apps têm aba própria de reposts (o perfil principal só mostra originais); só as curtidas mudam de lugar.
 const SECTION_URL_BUILDERS: Record<XWebApp, Record<CaptureMode, SectionUrlBuilder>> = {
   'responsive-web': {
@@ -25,17 +24,21 @@ const SECTION_URL_BUILDERS: Record<XWebApp, Record<CaptureMode, SectionUrlBuilde
     replies: ownerHandle => `https://x.com/${ownerHandle}/with_replies`,
     reposts: ownerHandle => `https://x.com/${ownerHandle}/reposts`,
     likes: ownerHandle => `https://x.com/${ownerHandle}/likes`,
+    following: ownerHandle => `https://x.com/${ownerHandle}/following`,
+    followers: ownerHandle => `https://x.com/${ownerHandle}/followers`,
   },
   'x-web': {
     posts: ownerHandle => `https://x.com/${ownerHandle}`,
     replies: ownerHandle => `https://x.com/${ownerHandle}/with_replies`,
     reposts: ownerHandle => `https://x.com/${ownerHandle}/reposts`,
     likes: () => 'https://x.com/i/history/likes',
+    following: ownerHandle => `https://x.com/${ownerHandle}/following`,
+    followers: ownerHandle => `https://x.com/${ownerHandle}/followers`,
   },
 }
 
 export async function captureItems(
-  kinds: ItemKind[],
+  targets: CaptureTarget[],
   signal: AbortSignal,
   onSectionStart: SectionStartHandler,
 ): Promise<CaptureResult> {
@@ -47,14 +50,14 @@ export async function captureItems(
   signal.addEventListener('abort', stopPageCapture, { once: true })
 
   try {
-    return await captureFromTab(tabId, kinds, signal, onSectionStart)
+    return await captureFromTab(tabId, targets, signal, onSectionStart)
   } finally {
     signal.removeEventListener('abort', stopPageCapture)
   }
 }
 
-export function selectCaptureModes(kinds: ItemKind[]): CaptureMode[] {
-  return CAPTURE_MODES.filter(mode => kinds.includes(CAPTURE_MODE_KIND[mode]))
+export function selectCaptureModes(targets: CaptureTarget[]): CaptureMode[] {
+  return CAPTURE_MODES.filter(mode => targets.includes(CAPTURE_MODE_TARGET[mode]))
 }
 
 export function buildSectionUrl(mode: CaptureMode, session: XSession): string {
@@ -63,16 +66,20 @@ export function buildSectionUrl(mode: CaptureMode, session: XSession): string {
 
 async function captureFromTab(
   tabId: number,
-  kinds: ItemKind[],
+  targets: CaptureTarget[],
   signal: AbortSignal,
   onSectionStart: SectionStartHandler,
 ): Promise<CaptureResult> {
   const capturedItems: CapturedItem[] = []
+  const capturedNonFollowers: Account[] = []
+  const capturedFollowers: Account[] = []
   const seenOperations: string[] = []
   let timelineResponseCount = 0
 
   const buildResult = (wasStopped: boolean): CaptureResult => ({
-    items: dedupeItems(capturedItems).filter(item => kinds.includes(item.kind)),
+    items: dedupeItems(capturedItems).filter(item => targets.includes(item.kind)),
+    nonFollowers: capturedNonFollowers,
+    followers: capturedFollowers,
     wasStopped,
     timelineResponseCount,
     seenOperations,
@@ -87,10 +94,14 @@ async function captureFromTab(
     throw new XNotLoggedInError()
   }
 
-  const captureModes = selectCaptureModes(kinds)
+  const captureModes = selectCaptureModes(targets)
 
   for (const [index, mode] of captureModes.entries()) {
-    onSectionStart({ kind: CAPTURE_MODE_KIND[mode], step: index + 1, totalSteps: captureModes.length })
+    onSectionStart({
+      target: CAPTURE_MODE_TARGET[mode],
+      step: index + 1,
+      totalSteps: captureModes.length,
+    })
     await navigateXTab(tabId, buildSectionUrl(mode, session))
 
     if (signal.aborted) {
@@ -104,6 +115,8 @@ async function captureFromTab(
     })
 
     capturedItems.push(...section.items)
+    capturedNonFollowers.push(...section.nonFollowers)
+    capturedFollowers.push(...section.followers)
     seenOperations.push(...section.seenOperations)
     timelineResponseCount += section.timelineResponseCount
 

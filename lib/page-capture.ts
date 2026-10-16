@@ -1,10 +1,13 @@
+import { selectFollowers, selectNonFollowers } from './accounts'
+import type { Account } from './accounts'
+import { CAPTURE_MODE_TARGET, describeCaptureTarget } from './capture-modes'
+import type { CaptureMode, PeopleCaptureMode, PostCaptureMode } from './capture-modes'
 import { showCaptureOverlay } from './capture-overlay'
-import { messages } from './i18n'
 import type { CapturedItem } from './items'
 import type { GraphqlResponseMessage } from './page-messages'
 import { sleep } from './sleep'
-import { CAPTURE_MODE_KIND, parseTimelineResponse } from './timeline-parser'
-import type { CaptureMode } from './timeline-parser'
+import { parseTimelineResponse } from './timeline-parser'
+import { parseTimelineUsers } from './user-timeline-parser'
 
 export type XWebApp = 'responsive-web' | 'x-web'
 
@@ -15,6 +18,8 @@ export interface XSession {
 
 export interface CaptureResult {
   items: CapturedItem[]
+  nonFollowers: Account[]
+  followers: Account[]
   wasStopped: boolean
   timelineResponseCount: number
   seenOperations: string[]
@@ -29,7 +34,7 @@ const PROFILE_TIMELINE_OPERATIONS = [
   'UserRepostsTimeline',
 ]
 
-const CAPTURE_OPERATIONS: Record<CaptureMode, string[]> = {
+const POST_CAPTURE_OPERATIONS: Record<PostCaptureMode, string[]> = {
   posts: PROFILE_TIMELINE_OPERATIONS,
   replies: PROFILE_TIMELINE_OPERATIONS,
   reposts: PROFILE_TIMELINE_OPERATIONS,
@@ -74,11 +79,10 @@ export async function captureTimeline(
 ): Promise<CaptureResult> {
   const captureController = new AbortController()
   const { signal } = captureController
-  const sectionLabel = messages.kinds[CAPTURE_MODE_KIND[mode]]
+  const sectionLabel = describeCaptureTarget(CAPTURE_MODE_TARGET[mode])
   const removeOverlay = showCaptureOverlay(sectionLabel, () => captureController.abort())
-  const operationNames = CAPTURE_OPERATIONS[mode]
   const readTimelineResponses = () =>
-    receivedResponses.filter(response => operationNames.includes(response.operationName))
+    receivedResponses.filter(response => isTimelineOperation(mode, response.operationName))
 
   activeCaptureController = captureController
 
@@ -89,7 +93,7 @@ export async function captureTimeline(
     const timelineResponses = readTimelineResponses()
 
     return {
-      items: parseResponses(timelineResponses, mode, ownerHandle),
+      ...parseSection(timelineResponses, mode, ownerHandle),
       wasStopped: signal.aborted,
       timelineResponseCount: timelineResponses.length,
       seenOperations: summarizeOperations(receivedResponses),
@@ -117,9 +121,42 @@ async function scrollUntilTimelineEnds(
   }
 }
 
-function parseResponses(
+// O nome das operações das listas de pessoas muda entre versões do X; todas contêm "Following" ou "Followers".
+const PEOPLE_OPERATION_FRAGMENTS: Record<PeopleCaptureMode, string> = {
+  following: 'Following',
+  followers: 'Followers',
+}
+
+function isTimelineOperation(mode: CaptureMode, operationName: string): boolean {
+  if (mode === 'following' || mode === 'followers') {
+    return operationName.includes(PEOPLE_OPERATION_FRAGMENTS[mode])
+  }
+
+  return POST_CAPTURE_OPERATIONS[mode].includes(operationName)
+}
+
+function parseSection(
   responses: GraphqlResponseMessage[],
   mode: CaptureMode,
+  ownerHandle: string,
+): Pick<CaptureResult, 'items' | 'nonFollowers' | 'followers'> {
+  const emptySection = { items: [], nonFollowers: [], followers: [] }
+  const readUsers = () => responses.flatMap(response => parseTimelineUsers(readJson(response.body)))
+
+  if (mode === 'following') {
+    return { ...emptySection, nonFollowers: selectNonFollowers(readUsers()) }
+  }
+
+  if (mode === 'followers') {
+    return { ...emptySection, followers: selectFollowers(readUsers()) }
+  }
+
+  return { ...emptySection, items: parseResponses(responses, mode, ownerHandle) }
+}
+
+function parseResponses(
+  responses: GraphqlResponseMessage[],
+  mode: PostCaptureMode,
   ownerHandle: string,
 ): CapturedItem[] {
   const itemsByKey = new Map<string, CapturedItem>()

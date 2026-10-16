@@ -1,7 +1,7 @@
+import type { CaptureMode } from './capture-modes'
 import type { CapturedItem } from './items'
 import type { CaptureResult, XSession } from './page-capture'
 import type { RemovalResult } from './removal-response'
-import type { CaptureMode } from './timeline-parser'
 
 export type BridgeRequest =
   | { type: 'detect-handle' }

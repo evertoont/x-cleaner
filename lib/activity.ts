@@ -1,4 +1,5 @@
 import type { CaptureSection } from './capture-items'
+import { describeCaptureTarget } from './capture-modes'
 import { LOCALE, messages } from './i18n'
 import { ESTIMATED_MS_PER_REMOVAL } from './removal-pace'
 
@@ -76,7 +77,11 @@ function describeCapture(section: CaptureSection | undefined): string {
     return messages.activity.openingX
   }
 
-  return messages.activity.capturing(messages.kinds[section.kind], section.step, section.totalSteps)
+  return messages.activity.capturing(
+    describeCaptureTarget(section.target),
+    section.step,
+    section.totalSteps,
+  )
 }
 
 function describeRateLimit(resumeAt: Date): string {

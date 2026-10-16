@@ -1,15 +1,7 @@
+import type { PostCaptureMode } from './capture-modes'
 import { decodeHtmlEntities } from './html-entities'
 import { createItem } from './items'
-import type { CapturedItem, ItemKind } from './items'
-
-export type CaptureMode = 'posts' | 'replies' | 'reposts' | 'likes'
-
-export const CAPTURE_MODE_KIND: Record<CaptureMode, ItemKind> = {
-  posts: 'tweet',
-  replies: 'reply',
-  reposts: 'retweet',
-  likes: 'like',
-}
+import type { CapturedItem } from './items'
 
 interface RawUser {
   core?: { screen_name?: string }
@@ -50,7 +42,7 @@ const TWEET_RESULTS_FIELD = 'tweet_results'
 
 export function parseTimelineResponse(
   body: unknown,
-  mode: CaptureMode,
+  mode: PostCaptureMode,
   ownerHandle: string,
 ): CapturedItem[] {
   const tweets = collectTweetResults(body)

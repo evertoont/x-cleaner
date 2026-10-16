@@ -12,8 +12,17 @@ describe('describeActivity', () => {
 
   it('names the section being fetched and its position', () => {
     expect(
-      describeActivity({ type: 'capturing', section: { kind: 'like', step: 2, totalSteps: 3 } }),
+      describeActivity({ type: 'capturing', section: { target: 'like', step: 2, totalSteps: 3 } }),
     ).toBe('Fetching Likes (2 of 3)… the X tab scrolls by itself.')
+  })
+
+  it('names the following section', () => {
+    expect(
+      describeActivity({
+        type: 'capturing',
+        section: { target: 'following', step: 5, totalSteps: 5 },
+      }),
+    ).toBe('Fetching Following (5 of 5)… the X tab scrolls by itself.')
   })
 
   it('estimates the time left while removing', () => {
