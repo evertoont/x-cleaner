@@ -1,0 +1,169 @@
+{
+  "data": {
+    "user_result_by_screen_name": {
+      "result": {
+        "__typename": "User",
+        "profile_user_replies_timeline": {
+          "timeline": {
+            "instructions": [
+              {
+                "__typename": "TimelineAddEntries",
+                "entries": [
+                  {
+                    "entryId": "profile-conversation-3001",
+                    "content": {
+                      "__typename": "TimelineTimelineModule",
+                      "items": [
+                        {
+                          "entryId": "profile-conversation-3001-tweet-9201",
+                          "item": {
+                            "content": {
+                              "__typename": "TimelineTweet",
+                              "tweet_results": {
+                                "result": {
+                                  "__typename": "Tweet",
+                                  "rest_id": "9201",
+                                  "core": {
+                                    "user_results": {
+                                      "result": {
+                                        "__typename": "User",
+                                        "core": {
+                                          "name": "Other",
+                                          "screen_name": "other"
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "details": {
+                                    "created_at_ms": 1717747200000,
+                                    "full_text": "Pergunta de outra pessoa"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "entryId": "profile-conversation-3001-tweet-3001",
+                          "item": {
+                            "content": {
+                              "__typename": "TimelineTweet",
+                              "tweet_results": {
+                                "result": {
+                                  "__typename": "Tweet",
+                                  "rest_id": "3001",
+                                  "core": {
+                                    "user_results": {
+                                      "result": {
+                                        "__typename": "User",
+                                        "core": {
+                                          "name": "Owner",
+                                          "screen_name": "owner"
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "details": {
+                                    "created_at_ms": 1717750800000,
+                                    "full_text": "@other minha resposta"
+                                  },
+                                  "reply_to_results": {
+                                    "result": {
+                                      "__typename": "Tweet",
+                                      "rest_id": "9201"
+                                    }
+                                  },
+                                  "reply_to_user_results": {
+                                    "result": {
+                                      "__typename": "User",
+                                      "core": {
+                                        "name": "Other",
+                                        "screen_name": "other"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "entryId": "tweet-3002",
+                    "content": {
+                      "__typename": "TimelineTimelineItem",
+                      "content": {
+                        "__typename": "TimelineTweet",
+                        "tweet_results": {
+                          "result": {
+                            "__typename": "Tweet",
+                            "rest_id": "3002",
+                            "core": {
+                              "user_results": {
+                                "result": {
+                                  "__typename": "User",
+                                  "core": {
+                                    "name": "Owner",
+                                    "screen_name": "owner"
+                                  }
+                                }
+                              }
+                            },
+                            "details": {
+                              "created_at_ms": 1717800000000,
+                              "full_text": "Tweet comum com wrappers vazios"
+                            },
+                            "reply_to_results": {},
+                            "reply_to_user_results": {}
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "entryId": "tweet-3003",
+                    "content": {
+                      "__typename": "TimelineTimelineItem",
+                      "content": {
+                        "__typename": "TimelineTweet",
+                        "tweet_results": {
+                          "result": {
+                            "__typename": "Tweet",
+                            "rest_id": "3003",
+                            "core": {
+                              "user_results": {
+                                "result": {
+                                  "__typename": "User",
+                                  "core": {
+                                    "name": "Owner",
+                                    "screen_name": "owner"
+                                  }
+                                }
+                              }
+                            },
+                            "details": {
+                              "created_at_ms": 1717900000000,
+                              "full_text": "Tweet comum com result nulo"
+                            },
+                            "reply_to_results": {
+                              "result": null
+                            },
+                            "reply_to_user_results": {
+                              "result": null
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

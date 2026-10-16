@@ -1,0 +1,82 @@
+{
+  "data": {
+    "user_result_by_screen_name": {
+      "result": {
+        "__typename": "User",
+        "profile_user_reposts_timeline": {
+          "timeline": {
+            "instructions": [
+              {
+                "__typename": "TimelineAddEntries",
+                "entries": [
+                  {
+                    "entryId": "tweet-9301",
+                    "content": {
+                      "__typename": "TimelineTimelineItem",
+                      "content": {
+                        "__typename": "TimelineTweet",
+                        "tweet_results": {
+                          "result": {
+                            "__typename": "Tweet",
+                            "rest_id": "9301",
+                            "core": { "user_results": { "result": { "__typename": "User", "core": { "name": "Someone", "screen_name": "someone" } } } },
+                            "details": { "created_at_ms": 1712000000000, "full_text": "Tweet original que eu retweetei" },
+                            "legacy": { "retweeted": true }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "entryId": "tweet-4002",
+                    "content": {
+                      "__typename": "TimelineTimelineItem",
+                      "content": {
+                        "__typename": "TimelineTweet",
+                        "tweet_results": {
+                          "result": {
+                            "__typename": "Tweet",
+                            "rest_id": "4002",
+                            "core": { "user_results": { "result": { "__typename": "User", "core": { "name": "Owner", "screen_name": "owner" } } } },
+                            "details": { "created_at_ms": 1712100000000, "full_text": "RT @another: texto truncado…" },
+                            "legacy": {
+                              "retweeted_status_results": {
+                                "result": {
+                                  "__typename": "Tweet",
+                                  "rest_id": "9302",
+                                  "core": { "user_results": { "result": { "__typename": "User", "core": { "name": "Another", "screen_name": "another" } } } },
+                                  "details": { "created_at_ms": 1712090000000, "full_text": "Outro original completo" }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "entryId": "tweet-4003",
+                    "content": {
+                      "__typename": "TimelineTimelineItem",
+                      "content": {
+                        "__typename": "TimelineTweet",
+                        "tweet_results": {
+                          "result": {
+                            "__typename": "Tweet",
+                            "rest_id": "4003",
+                            "core": { "user_results": { "result": { "__typename": "User", "core": { "name": "Owner", "screen_name": "owner" } } } },
+                            "details": { "created_at_ms": 1712200000000, "full_text": "Post original meu, não é retweet" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "data": {
+    "user_result_by_rest_id": {
+      "result": {
+        "__typename": "User",
+        "timeline": {
+          "timeline": {
+            "instructions": [
+              {
+                "__typename": "TimelineAddEntries",
+                "entries": [
+                  {
+                    "entryId": "tweet-8001",
+                    "content": {
+                      "__typename": "TimelineTimelineItem",
+                      "content": {
+                        "__typename": "TimelineTweet",
+                        "tweet_results": {
+                          "result": {
+                            "__typename": "Tweet",
+                            "rest_id": "8001",
+                            "core": { "user_results": { "result": { "__typename": "User", "core": { "name": "Someone", "screen_name": "someone" } } } },
+                            "details": { "created_at_ms": 1706810400000, "full_text": "Tweet curtido no formato novo" },
+                            "legacy": { "favorited": true }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

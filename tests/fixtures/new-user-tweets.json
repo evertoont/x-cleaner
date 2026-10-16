@@ -1,0 +1,91 @@
+{
+  "data": {
+    "user_result_by_screen_name": {
+      "result": {
+        "__typename": "User",
+        "profile_user_tweets_timeline": {
+          "timeline": {
+            "instructions": [
+              {
+                "__typename": "TimelineAddEntries",
+                "entries": [
+                  {
+                    "entryId": "tweet-2001",
+                    "content": {
+                      "__typename": "TimelineTimelineItem",
+                      "content": {
+                        "__typename": "TimelineTweet",
+                        "tweet_results": {
+                          "result": {
+                            "__typename": "Tweet",
+                            "rest_id": "2001",
+                            "core": { "user_results": { "result": { "__typename": "User", "core": { "name": "Owner", "screen_name": "Owner" } } } },
+                            "details": { "created_at_ms": 1704189600000, "full_text": "Formato novo &amp; teste" },
+                            "legacy": { "favorited": false, "retweeted": false },
+                            "reply_to_results": null,
+                            "reply_to_user_results": null
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "entryId": "tweet-2002",
+                    "content": {
+                      "__typename": "TimelineTimelineItem",
+                      "content": {
+                        "__typename": "TimelineTweet",
+                        "tweet_results": {
+                          "result": {
+                            "__typename": "Tweet",
+                            "rest_id": "2002",
+                            "core": { "user_results": { "result": { "__typename": "User", "core": { "name": "Owner", "screen_name": "owner" } } } },
+                            "details": { "created_at_ms": "1709640000000", "full_text": "RT @someone: texto truncado…" },
+                            "legacy": {
+                              "retweeted": true,
+                              "retweeted_status_results": {
+                                "result": {
+                                  "__typename": "TweetWithVisibilityResults",
+                                  "tweet": {
+                                    "rest_id": "9101",
+                                    "core": { "user_results": { "result": { "__typename": "User", "core": { "name": "Someone", "screen_name": "someone" } } } },
+                                    "details": { "created_at_ms": 1709636400000, "full_text": "Texto original completo" }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "entryId": "tweet-2003",
+                    "content": {
+                      "__typename": "TimelineTimelineItem",
+                      "content": {
+                        "__typename": "TimelineTweet",
+                        "tweet_results": {
+                          "result": {
+                            "__typename": "TweetWithVisibilityResults",
+                            "tweet": {
+                              "__typename": "Tweet",
+                              "rest_id": "2003",
+                              "core": { "user_results": { "result": { "__typename": "User", "core": { "name": "Owner", "screen_name": "owner" } } } },
+                              "details": { "created_at_ms": 1723303800000, "full_text": "Texto cortado…" },
+                              "note_tweet": { "note_tweet_results": { "result": { "text": "Texto longo completo" } } }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
