@@ -67,6 +67,12 @@ export const en = {
         ? '1 item failed and is still in the list.'
         : `${count} items failed and are still in the list.`,
   },
+  confirmDialog: {
+    title: (count: number) => `Remove ${countOf(count, 'item', 'items')}?`,
+    duration: (duration: string) =>
+      `Takes about ${duration}. Keep this tab and the X tab open until it finishes.`,
+    irreversible: "This can't be undone.",
+  },
   activity: {
     openingX: 'Opening X…',
     capturing: (kindLabel: string, step: number, totalSteps: number) =>

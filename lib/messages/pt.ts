@@ -68,6 +68,12 @@ export const pt: Messages = {
         ? '1 item falhou e continua na lista.'
         : `${count} itens falharam e continuam na lista.`,
   },
+  confirmDialog: {
+    title: (count: number) => `Remover ${countOf(count, 'item', 'itens')}?`,
+    duration: (duration: string) =>
+      `Leva cerca de ${duration}. Deixe este painel e a aba do X abertos até terminar.`,
+    irreversible: 'Não dá para reverter.',
+  },
   activity: {
     openingX: 'Abrindo o X…',
     capturing: (kindLabel: string, step: number, totalSteps: number) =>
