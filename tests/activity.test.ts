@@ -26,35 +26,59 @@ describe('describeActivity', () => {
   })
 
   it('estimates the time left while removing', () => {
-    expect(describeActivity({ type: 'removing', completed: 12, total: 420 })).toBe(
-      'Removing 12 of 420 · about 21 min left',
-    )
+    expect(
+      describeActivity({ type: 'removing', target: 'items', completed: 12, total: 420 }),
+    ).toBe('Removing 12 of 420 · about 21 min left')
   })
 
   it('shows hours for long removals', () => {
-    expect(describeActivity({ type: 'removing', completed: 0, total: 1500 })).toBe(
-      'Removing 0 of 1500 · about 1 hr 15 min left',
-    )
+    expect(
+      describeActivity({ type: 'removing', target: 'items', completed: 0, total: 1500 }),
+    ).toBe('Removing 0 of 1500 · about 1 hr 15 min left')
+  })
+
+  it('estimates unfollows at their slower pace', () => {
+    expect(
+      describeActivity({ type: 'removing', target: 'unfollow', completed: 10, total: 50 }),
+    ).toBe('Unfollowing 10 of 50 · about 5 min left')
   })
 })
 
 describe('estimateRemovalDuration', () => {
   it('rounds short removals up to a minute', () => {
-    expect(estimateRemovalDuration(3)).toBe('1 min')
+    expect(estimateRemovalDuration(3, 'items')).toBe('1 min')
   })
 
-  it('estimates from the average time per item', () => {
-    expect(estimateRemovalDuration(42)).toBe('3 min')
+  it('estimates from the average time per entry', () => {
+    expect(estimateRemovalDuration(42, 'items')).toBe('3 min')
+    expect(estimateRemovalDuration(42, 'unfollow')).toBe('5 min')
   })
 })
 
 describe('describeActivityAnnouncement', () => {
   it('announces removal progress only at 10% milestones', () => {
-    expect(describeActivityAnnouncement({ type: 'removing', completed: 12, total: 42 })).toBe(
-      'Removing: 20% done',
-    )
-    expect(describeActivityAnnouncement({ type: 'removing', completed: 13, total: 42 })).toBe(
-      'Removing: 30% done',
-    )
+    expect(
+      describeActivityAnnouncement({ type: 'removing', target: 'items', completed: 12, total: 42 }),
+    ).toBe('Removing: 20% done')
+    expect(
+      describeActivityAnnouncement({ type: 'removing', target: 'items', completed: 13, total: 42 }),
+    ).toBe('Removing: 30% done')
+  })
+
+  it('describes follower removals with their own wording', () => {
+    expect(
+      describeActivityAnnouncement({
+        type: 'removing',
+        target: 'removeFollower',
+        completed: 3,
+        total: 10,
+      }),
+    ).toBe('Removing followers: 30% done')
+  })
+
+  it('announces unfollow milestones', () => {
+    expect(
+      describeActivityAnnouncement({ type: 'removing', target: 'unfollow', completed: 5, total: 10 }),
+    ).toBe('Unfollowing: 50% done')
   })
 })

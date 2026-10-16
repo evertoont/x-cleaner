@@ -8,7 +8,6 @@ export const en = {
     like: 'Likes',
   },
   nav: {
-    label: 'Item types',
     activityHeading: 'Activity',
     peopleHeading: 'People',
     selectedCount: (count: number) => `${count} selected`,

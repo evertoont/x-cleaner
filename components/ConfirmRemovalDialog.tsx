@@ -1,29 +1,21 @@
 import { TriangleAlert } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import type { MouseEvent } from 'react'
-import { estimateRemovalDuration } from '../lib/activity'
 import { messages } from '../lib/i18n'
-import { sumKindCounts } from '../lib/items'
-import type { KindCounts } from '../lib/items'
-import { describeRemovalActions } from '../lib/removal-summary'
-import { KIND_ICONS } from './kind-icons'
+import type { RemovalPresentation } from './removal-presentations'
 
 interface ConfirmRemovalDialogProps {
   isOpen: boolean
-  selectedCounts: KindCounts
-  confirmLabel: string
-  confirmIcon: LucideIcon
+  presentation: RemovalPresentation
   onConfirm: () => void
   onCancel: () => void
 }
 
 export function ConfirmRemovalDialog(props: ConfirmRemovalDialogProps) {
-  const { isOpen, selectedCounts, confirmLabel, confirmIcon: ConfirmIcon, onConfirm, onCancel } =
-    props
+  const { isOpen, presentation, onConfirm, onCancel } = props
+  const { buttonLabel, buttonIcon: ButtonIcon, dialogTitle, dialogLines, dialogNotes, dialogWarning } =
+    presentation
   const dialogRef = useRef<HTMLDialogElement>(null)
-
-  const selectedCount = sumKindCounts(selectedCounts)
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -60,38 +52,42 @@ export function ConfirmRemovalDialog(props: ConfirmRemovalDialogProps) {
     >
       <div className="confirm-dialog-body">
         <h2 id="confirm-removal-title" className="confirm-dialog-title">
-          {messages.confirmDialog.title(selectedCount)}
+          {dialogTitle}
         </h2>
 
         <ul className="confirm-dialog-actions">
-          {describeRemovalActions(selectedCounts).map(actionLine => {
-            const KindIcon = KIND_ICONS[actionLine.kind]
+          {dialogLines.map(dialogLine => {
+            const LineIcon = dialogLine.icon
 
             return (
-              <li key={actionLine.kind} className="confirm-dialog-action">
-                <KindIcon size={16} strokeWidth={1.75} aria-hidden />
-                {actionLine.description}
+              <li key={dialogLine.key} className="confirm-dialog-action" data-muted={!LineIcon}>
+                {LineIcon && <LineIcon size={16} strokeWidth={1.75} aria-hidden />}
+                {dialogLine.description}
               </li>
             )
           })}
         </ul>
 
-        <p className="confirm-dialog-note">
-          {messages.confirmDialog.duration(estimateRemovalDuration(selectedCount))}
-        </p>
+        {dialogNotes.map(dialogNote => (
+          <p key={dialogNote} className="confirm-dialog-note">
+            {dialogNote}
+          </p>
+        ))}
 
-        <p className="confirm-dialog-warning">
-          <TriangleAlert size={16} strokeWidth={2} aria-hidden />
-          {messages.confirmDialog.irreversible}
-        </p>
+        {dialogWarning && (
+          <p className="confirm-dialog-warning">
+            <TriangleAlert size={16} strokeWidth={2} aria-hidden />
+            {dialogWarning}
+          </p>
+        )}
 
         <div className="confirm-dialog-buttons">
           <button type="button" className="button button-quiet" onClick={onCancel}>
             {messages.toolbar.cancel}
           </button>
           <button type="button" className="button button-danger" onClick={onConfirm}>
-            <ConfirmIcon size={16} strokeWidth={1.75} aria-hidden />
-            {confirmLabel}
+            <ButtonIcon size={16} strokeWidth={1.75} aria-hidden />
+            {buttonLabel}
           </button>
         </div>
       </div>

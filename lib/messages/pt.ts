@@ -9,7 +9,6 @@ export const pt: Messages = {
     like: 'Curtidas',
   },
   nav: {
-    label: 'Tipos de item',
     activityHeading: 'Atividade',
     peopleHeading: 'Pessoas',
     selectedCount: (count: number) => countOf(count, 'selecionado', 'selecionados'),

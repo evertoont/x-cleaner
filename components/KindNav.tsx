@@ -2,9 +2,10 @@ import { messages } from '../lib/i18n'
 import { ITEM_KINDS } from '../lib/items'
 import type { ItemKind, KindCounts } from '../lib/items'
 import { KIND_ICONS } from './kind-icons'
+import { NavItem } from './NavItem'
 
 interface KindNavProps {
-  activeKind: ItemKind
+  activeKind?: ItemKind
   countsByKind: KindCounts
   selectedCountsByKind: KindCounts
   onSelectKind: (kind: ItemKind) => void
@@ -14,33 +15,24 @@ export function KindNav(props: KindNavProps) {
   const { activeKind, countsByKind, selectedCountsByKind, onSelectKind } = props
 
   return (
-    <nav className="kind-nav" aria-label={messages.nav.label}>
-      {ITEM_KINDS.map(kind => {
-        const KindIcon = KIND_ICONS[kind]
-        const selectedCount = selectedCountsByKind[kind]
+    <nav className="nav-group" aria-labelledby="activity-nav-heading">
+      <h2 id="activity-nav-heading" className="sidebar-heading">
+        {messages.nav.activityHeading}
+      </h2>
 
-        return (
-          <button
+      <div className="kind-nav">
+        {ITEM_KINDS.map(kind => (
+          <NavItem
             key={kind}
-            type="button"
-            className="kind-nav-item"
-            aria-current={kind === activeKind ? 'page' : undefined}
-            onClick={() => onSelectKind(kind)}
-          >
-            <KindIcon size={16} strokeWidth={1.75} aria-hidden />
-            <span>{messages.kinds[kind]}</span>
-            <span className="kind-nav-counts">
-              {selectedCount > 0 && (
-                <span className="kind-nav-selected" title={messages.nav.selectedCount(selectedCount)}>
-                  <span aria-hidden>{selectedCount}</span>
-                  <span className="visually-hidden">{messages.nav.selectedCount(selectedCount)}</span>
-                </span>
-              )}
-              <span className="kind-nav-count">{countsByKind[kind]}</span>
-            </span>
-          </button>
-        )
-      })}
+            icon={KIND_ICONS[kind]}
+            label={messages.kinds[kind]}
+            count={countsByKind[kind]}
+            selectedCount={selectedCountsByKind[kind]}
+            isActive={kind === activeKind}
+            onSelect={() => onSelectKind(kind)}
+          />
+        ))}
+      </div>
     </nav>
   )
 }

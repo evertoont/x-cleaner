@@ -1,22 +1,18 @@
-import { HeartOff, Square, Trash2, TriangleAlert, Undo2 } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { Square, TriangleAlert } from 'lucide-react'
 import { useState } from 'react'
 import { describeActivity, describeActivityAnnouncement } from '../lib/activity'
 import type { Activity, Notice } from '../lib/activity'
 import { messages } from '../lib/i18n'
-import { sumKindCounts } from '../lib/items'
-import type { ItemKind, KindCounts } from '../lib/items'
-import { selectRemovalAction } from '../lib/removal-summary'
-import type { RemovalButtonAction } from '../lib/removal-summary'
 import { ConfirmRemovalDialog } from './ConfirmRemovalDialog'
 import { ProgressBar } from './ProgressBar'
+import type { RemovalPresentation } from './removal-presentations'
 
 interface ActionBarProps {
   activity: Activity
   notice: Notice | null
-  activeKind: ItemKind
-  selectedCounts: KindCounts
+  selectedCount: number
   unselectedFailedCount: number
+  removal: RemovalPresentation
   isAllVisibleSelected: boolean
   hasVisibleItems: boolean
   onToggleAllVisible: () => void
@@ -26,20 +22,13 @@ interface ActionBarProps {
   onStop: () => void
 }
 
-const REMOVAL_ACTION_ICONS: Record<RemovalButtonAction, LucideIcon> = {
-  delete: Trash2,
-  undoRepost: Undo2,
-  unlike: HeartOff,
-  mixed: Trash2,
-}
-
 export function ActionBar(props: ActionBarProps) {
   const {
     activity,
     notice,
-    activeKind,
-    selectedCounts,
+    selectedCount,
     unselectedFailedCount,
+    removal,
     isAllVisibleSelected,
     hasVisibleItems,
     onToggleAllVisible,
@@ -50,18 +39,14 @@ export function ActionBar(props: ActionBarProps) {
   } = props
   const [isConfirming, setIsConfirming] = useState(false)
 
-  const selectedCount = sumKindCounts(selectedCounts)
   const isBusy = activity.type !== 'idle'
   const isRemoving = activity.type === 'removing'
+  const RemovalIcon = removal.buttonIcon
 
   const activityMessage = describeActivity(activity)
   const statusMessage = activityMessage ?? notice?.message
   const statusTone = activityMessage ? 'info' : notice?.tone
   const announcement = describeActivityAnnouncement(activity) ?? notice?.message
-
-  const removalAction = selectRemovalAction(selectedCounts, activeKind)
-  const removalLabel = messages.removal.button[removalAction](selectedCount)
-  const RemovalIcon = REMOVAL_ACTION_ICONS[removalAction]
 
   function handleConfirm() {
     setIsConfirming(false)
@@ -113,7 +98,7 @@ export function ActionBar(props: ActionBarProps) {
               onClick={() => setIsConfirming(true)}
             >
               <RemovalIcon size={16} strokeWidth={1.75} aria-hidden />
-              {removalLabel}
+              {removal.buttonLabel}
             </button>
           )}
         </div>
@@ -141,9 +126,7 @@ export function ActionBar(props: ActionBarProps) {
 
       <ConfirmRemovalDialog
         isOpen={isConfirming && selectedCount > 0 && !isBusy}
-        selectedCounts={selectedCounts}
-        confirmLabel={removalLabel}
-        confirmIcon={RemovalIcon}
+        presentation={removal}
         onConfirm={handleConfirm}
         onCancel={() => setIsConfirming(false)}
       />

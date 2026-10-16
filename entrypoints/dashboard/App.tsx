@@ -1,59 +1,106 @@
 import { Eraser } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
+import { AccountList } from '../../components/AccountList'
+import { AccountSortSelect } from '../../components/AccountSortSelect'
 import { ActionBar } from '../../components/ActionBar'
 import { CaptureControls } from '../../components/CaptureControls'
 import { ItemList } from '../../components/ItemList'
 import { KindNav } from '../../components/KindNav'
+import { PeopleNav } from '../../components/PeopleNav'
+import { presentAccountRemoval, presentPostRemoval } from '../../components/removal-presentations'
+import { useAccountList } from '../../hooks/use-account-list'
 import { useCapturedItems } from '../../hooks/use-captured-items'
 import { useSelection } from '../../hooks/use-selection'
+import { planAccountRemovals, runAccountRemovals } from '../../lib/account-removals'
+import { mergeAccounts, PEOPLE_LIST_ACTIONS, sortAccounts } from '../../lib/accounts'
+import type { Account, AccountSort, PeopleList } from '../../lib/accounts'
 import type { Activity, Notice } from '../../lib/activity'
 import { captureItems } from '../../lib/capture-items'
+import { CAPTURE_TARGETS, describeCaptureTarget, isItemKind } from '../../lib/capture-modes'
+import type { CaptureTarget } from '../../lib/capture-modes'
 import { describeError } from '../../lib/errors'
-import { formatList, messages } from '../../lib/i18n'
-import { countItemsByKind, ITEM_KINDS, mergeItems, replaceItemsOfKinds } from '../../lib/items'
+import { formatDayAndTime, formatList, messages } from '../../lib/i18n'
+import { countItemsByKind, mergeItems, replaceItemsOfKinds } from '../../lib/items'
 import type { CapturedItem, ItemKind } from '../../lib/items'
 import type { CaptureResult } from '../../lib/page-capture'
 import type { SettledRemoval } from '../../lib/removal-queue'
-import { describeRemovalOutcome } from '../../lib/removal-summary'
+import { describeAccountRemovalOutcome, describeRemovalOutcome } from '../../lib/removal-summary'
 import { removeItems } from '../../lib/remove-items'
 import { focusCurrentTab } from '../../lib/x-tab'
 
+type DashboardView = { type: 'posts'; kind: ItemKind } | { type: 'people'; list: PeopleList }
+
+type SelectableEntry = Pick<CapturedItem, 'key' | 'status'>
+
+const EMPTY_ACCOUNTS: Account[] = []
+
 export function App() {
-  const { items, isLoaded, replaceItems, removeItem, markItemFailed } = useCapturedItems()
-  const { selectedKeys, toggleKey, selectKeys, deselectKeys, clearSelection } = useSelection()
-  const [activeKind, setActiveKind] = useState<ItemKind>('tweet')
-  const [captureKinds, setCaptureKinds] = useState<ItemKind[]>(ITEM_KINDS)
+  const { items, isLoaded: areItemsLoaded, replaceItems, removeItem, markItemFailed } =
+    useCapturedItems()
+  const nonFollowerList = useAccountList('nonFollowers')
+  const followerList = useAccountList('followers')
+  const postSelection = useSelection()
+  const nonFollowerSelection = useSelection()
+  const followerSelection = useSelection()
+  const [activeView, setActiveView] = useState<DashboardView>({ type: 'posts', kind: 'tweet' })
+  const [captureTargets, setCaptureTargets] = useState<CaptureTarget[]>(CAPTURE_TARGETS)
+  const [accountSort, setAccountSort] = useState<AccountSort>('recent')
   const [activity, setActivity] = useState<Activity>({ type: 'idle' })
   const [notice, setNotice] = useState<Notice | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
+
+  const accountLists = { nonFollowers: nonFollowerList, followers: followerList }
+  const accountSelections = { nonFollowers: nonFollowerSelection, followers: followerSelection }
+  const activeKind = activeView.type === 'posts' ? activeView.kind : undefined
+  const activeList = activeView.type === 'people' ? activeView.list : undefined
+  const activeSelection = activeList ? accountSelections[activeList] : postSelection
+  const isBusy = activity.type !== 'idle'
 
   const countsByKind = useMemo(() => countItemsByKind(items), [items])
   const visibleItems = useMemo(
     () => items.filter(item => item.kind === activeKind).sort(compareNewestFirst),
     [items, activeKind],
   )
-  const selectedItems = items.filter(item => selectedKeys.has(item.key))
+  const activeAccounts = activeList ? accountLists[activeList].accounts : EMPTY_ACCOUNTS
+  const sortedAccounts = useMemo(
+    () => sortAccounts(activeAccounts, accountSort),
+    [activeAccounts, accountSort],
+  )
+
+  const selectedItems = items.filter(item => postSelection.selectedKeys.has(item.key))
   const selectedCountsByKind = countItemsByKind(selectedItems)
+  const selectedAccounts = sortedAccounts.filter(account =>
+    activeSelection.selectedKeys.has(account.key),
+  )
 
-  const visibleKeys = visibleItems.map(item => item.key)
-  const unselectedFailedKeys = visibleItems
-    .filter(item => item.status === 'failed' && !selectedKeys.has(item.key))
-    .map(item => item.key)
+  const visibleEntries: SelectableEntry[] = activeList ? sortedAccounts : visibleItems
+  const visibleKeys = visibleEntries.map(entry => entry.key)
+  const unselectedFailedKeys = visibleEntries
+    .filter(entry => entry.status === 'failed' && !activeSelection.selectedKeys.has(entry.key))
+    .map(entry => entry.key)
   const isAllVisibleSelected =
-    visibleKeys.length > 0 && visibleKeys.every(itemKey => selectedKeys.has(itemKey))
-  const isBusy = activity.type !== 'idle'
-  const activeKindLabel = messages.kinds[activeKind]
+    visibleKeys.length > 0 && visibleKeys.every(entryKey => activeSelection.selectedKeys.has(entryKey))
 
-  function handleToggleCaptureKind(kind: ItemKind) {
-    setCaptureKinds(currentKinds =>
-      currentKinds.includes(kind)
-        ? currentKinds.filter(currentKind => currentKind !== kind)
-        : [...currentKinds, kind],
+  const viewTitle =
+    activeView.type === 'posts'
+      ? messages.kinds[activeView.kind]
+      : messages.people.lists[activeView.list].title
+  const removal =
+    activeView.type === 'posts'
+      ? presentPostRemoval(selectedCountsByKind, activeView.kind)
+      : presentAccountRemoval(PEOPLE_LIST_ACTIONS[activeView.list], selectedAccounts)
+
+  function handleToggleCaptureTarget(target: CaptureTarget) {
+    setCaptureTargets(currentTargets =>
+      currentTargets.includes(target)
+        ? currentTargets.filter(currentTarget => currentTarget !== target)
+        : [...currentTargets, target],
     )
   }
 
   async function handleCapture() {
-    const kindsToCapture = captureKinds
+    const targetsToCapture = captureTargets
+    const kindsToCapture = targetsToCapture.filter(isItemKind)
     const abortController = new AbortController()
 
     abortControllerRef.current = abortController
@@ -61,7 +108,7 @@ export function App() {
     setActivity({ type: 'capturing' })
 
     try {
-      const capture = await captureItems(kindsToCapture, abortController.signal, section =>
+      const capture = await captureItems(targetsToCapture, abortController.signal, section =>
         setActivity({ type: 'capturing', section }),
       )
 
@@ -70,8 +117,23 @@ export function App() {
           ? mergeItems(currentItems, capture.items)
           : replaceItemsOfKinds(currentItems, kindsToCapture, capture.items),
       )
-      clearSelection()
-      setNotice(describeCaptureOutcome(capture, kindsToCapture))
+
+      if (targetsToCapture.includes('following')) {
+        nonFollowerList.replaceAccounts(currentAccounts =>
+          combineCapturedAccounts(currentAccounts, capture.nonFollowers, capture.wasStopped),
+        )
+      }
+
+      if (targetsToCapture.includes('followers')) {
+        followerList.replaceAccounts(currentAccounts =>
+          combineCapturedAccounts(currentAccounts, capture.followers, capture.wasStopped),
+        )
+      }
+
+      postSelection.clearSelection()
+      nonFollowerSelection.clearSelection()
+      followerSelection.clearSelection()
+      setNotice(describeCaptureOutcome(capture, targetsToCapture))
     } catch (error) {
       console.error(error)
       setNotice({ message: describeError(error), tone: 'error' })
@@ -82,7 +144,7 @@ export function App() {
     }
   }
 
-  async function handleRemove() {
+  async function handleRemovePosts() {
     const itemsToRemove = selectedItems
     const abortController = new AbortController()
     const removedItems: CapturedItem[] = []
@@ -99,12 +161,12 @@ export function App() {
 
       removedItems.push(item)
       removeItem(item.key)
-      deselectKeys([item.key])
+      postSelection.deselectKeys([item.key])
     }
 
     abortControllerRef.current = abortController
     setNotice(null)
-    setActivity({ type: 'removing', completed: 0, total: itemsToRemove.length })
+    setActivity({ type: 'removing', target: 'items', completed: 0, total: itemsToRemove.length })
 
     try {
       await removeItems({
@@ -131,20 +193,99 @@ export function App() {
     }
   }
 
+  async function handleRemoveAccounts(list: PeopleList, accountsToRemove: Account[]) {
+    const action = PEOPLE_LIST_ACTIONS[list]
+    const plan = await planAccountRemovals(action, accountsToRemove)
+
+    if (plan.accountsToProcess.length === 0) {
+      setNotice({
+        message: messages.accountRemoval.limitReached(formatDayAndTime(plan.quotaResumeAt)),
+        tone: 'info',
+      })
+      return
+    }
+
+    const { removeAccount, markAccountFailed } = accountLists[list]
+    const selection = accountSelections[list]
+    const abortController = new AbortController()
+    let processedCount = 0
+    let failedCount = 0
+
+    const handleAccountSettled = (account: Account, removal: SettledRemoval) => {
+      setActivity(advanceProgress)
+
+      if (removal.status === 'failed') {
+        failedCount += 1
+        markAccountFailed(account.key, removal.message)
+        return
+      }
+
+      processedCount += 1
+      removeAccount(account.key)
+      selection.deselectKeys([account.key])
+    }
+
+    abortControllerRef.current = abortController
+    setNotice(null)
+    setActivity({
+      type: 'removing',
+      target: action,
+      completed: 0,
+      total: plan.accountsToProcess.length,
+    })
+
+    try {
+      await runAccountRemovals({
+        action,
+        accounts: plan.accountsToProcess,
+        signal: abortController.signal,
+        onAccountSettled: handleAccountSettled,
+        onRateLimited: resumeAt => setActivity(current => withResumeAt(current, resumeAt)),
+      })
+
+      setNotice({
+        message: describeAccountRemovalOutcome({
+          action,
+          processedCount,
+          failedCount,
+          heldBackCount: plan.heldBackCount,
+          quotaResumeAt: plan.quotaResumeAt,
+          wasStopped: abortController.signal.aborted,
+        }),
+        tone: failedCount > 0 ? 'error' : 'info',
+      })
+    } catch (error) {
+      console.error(error)
+      setNotice({ message: describeError(error), tone: 'error' })
+    } finally {
+      abortControllerRef.current = null
+      setActivity({ type: 'idle' })
+    }
+  }
+
+  function handleRemove() {
+    if (activeView.type === 'people') {
+      void handleRemoveAccounts(activeView.list, selectedAccounts)
+      return
+    }
+
+    void handleRemovePosts()
+  }
+
   function handleStop() {
     abortControllerRef.current?.abort()
   }
 
   function handleToggleAllVisible() {
     if (isAllVisibleSelected) {
-      deselectKeys(visibleKeys)
+      activeSelection.deselectKeys(visibleKeys)
       return
     }
 
-    selectKeys(visibleKeys)
+    activeSelection.selectKeys(visibleKeys)
   }
 
-  if (!isLoaded) {
+  if (!areItemsLoaded || !nonFollowerList.isLoaded || !followerList.isLoaded) {
     return null
   }
 
@@ -160,13 +301,26 @@ export function App() {
           activeKind={activeKind}
           countsByKind={countsByKind}
           selectedCountsByKind={selectedCountsByKind}
-          onSelectKind={setActiveKind}
+          onSelectKind={kind => setActiveView({ type: 'posts', kind })}
+        />
+
+        <PeopleNav
+          activeList={activeList}
+          accountCounts={{
+            nonFollowers: nonFollowerList.accounts.length,
+            followers: followerList.accounts.length,
+          }}
+          selectedCounts={{
+            nonFollowers: nonFollowerSelection.selectedKeys.size,
+            followers: followerSelection.selectedKeys.size,
+          }}
+          onSelectList={list => setActiveView({ type: 'people', list })}
         />
 
         <CaptureControls
-          selectedKinds={captureKinds}
+          selectedTargets={captureTargets}
           isBusy={isBusy}
-          onToggleKind={handleToggleCaptureKind}
+          onToggleTarget={handleToggleCaptureTarget}
           onCapture={handleCapture}
         />
 
@@ -176,41 +330,52 @@ export function App() {
       <main className="content">
         <div className="content-column">
           <header className="content-header">
-            <h1>{activeKindLabel}</h1>
-            <span className="content-count">{visibleItems.length}</span>
+            <h1>{viewTitle}</h1>
+            <span className="content-count">{visibleEntries.length}</span>
+            {activeList && <AccountSortSelect sort={accountSort} onChangeSort={setAccountSort} />}
           </header>
 
           <ActionBar
             activity={activity}
             notice={notice}
-            activeKind={activeKind}
-            selectedCounts={selectedCountsByKind}
+            selectedCount={activeList ? selectedAccounts.length : selectedItems.length}
             unselectedFailedCount={unselectedFailedKeys.length}
+            removal={removal}
             isAllVisibleSelected={isAllVisibleSelected}
-            hasVisibleItems={visibleItems.length > 0}
+            hasVisibleItems={visibleEntries.length > 0}
             onToggleAllVisible={handleToggleAllVisible}
-            onSelectFailed={() => selectKeys(unselectedFailedKeys)}
-            onClearSelection={clearSelection}
+            onSelectFailed={() => activeSelection.selectKeys(unselectedFailedKeys)}
+            onClearSelection={activeSelection.clearSelection}
             onRemove={handleRemove}
             onStop={handleStop}
           />
 
-          <ItemList
-            items={visibleItems}
-            selectedKeys={selectedKeys}
-            isSelectionLocked={isBusy}
-            emptyTitle={
-              items.length === 0
-                ? messages.list.emptyTitle
-                : messages.list.emptyKindTitle(activeKindLabel)
-            }
-            emptyDescription={
-              items.length === 0
-                ? messages.list.emptyDescription
-                : messages.list.emptyKindDescription
-            }
-            onToggle={toggleKey}
-          />
+          {activeView.type === 'posts' ? (
+            <ItemList
+              items={visibleItems}
+              selectedKeys={postSelection.selectedKeys}
+              isSelectionLocked={isBusy}
+              emptyTitle={
+                items.length === 0
+                  ? messages.list.emptyTitle
+                  : messages.list.emptyKindTitle(messages.kinds[activeView.kind])
+              }
+              emptyDescription={
+                items.length === 0
+                  ? messages.list.emptyDescription
+                  : messages.list.emptyKindDescription
+              }
+              onToggle={postSelection.toggleKey}
+            />
+          ) : (
+            <AccountList
+              list={activeView.list}
+              accounts={sortedAccounts}
+              selectedKeys={activeSelection.selectedKeys}
+              isSelectionLocked={isBusy}
+              onToggle={activeSelection.toggleKey}
+            />
+          )}
         </div>
       </main>
     </div>
@@ -219,6 +384,14 @@ export function App() {
 
 function compareNewestFirst(firstItem: CapturedItem, secondItem: CapturedItem): number {
   return secondItem.createdAt.localeCompare(firstItem.createdAt)
+}
+
+function combineCapturedAccounts(
+  currentAccounts: Account[],
+  capturedAccounts: Account[],
+  wasStopped: boolean,
+): Account[] {
+  return wasStopped ? mergeAccounts(currentAccounts, capturedAccounts) : capturedAccounts
 }
 
 function advanceProgress(activity: Activity): Activity {
@@ -237,23 +410,24 @@ function withResumeAt(activity: Activity, resumeAt: Date): Activity {
   return { ...activity, resumeAt }
 }
 
-function describeCaptureOutcome(capture: CaptureResult, capturedKinds: ItemKind[]): Notice {
-  const fetchedCount = messages.captureOutcome.fetched(capture.items.length)
+function describeCaptureOutcome(capture: CaptureResult, capturedTargets: CaptureTarget[]): Notice {
+  const fetchedCount = capture.items.length + capture.nonFollowers.length + capture.followers.length
+  const fetchedSummary = messages.captureOutcome.fetched(fetchedCount)
 
   if (capture.wasStopped) {
-    return { message: `${messages.captureOutcome.stopped} ${fetchedCount}`, tone: 'info' }
+    return { message: `${messages.captureOutcome.stopped} ${fetchedSummary}`, tone: 'info' }
   }
 
-  if (capture.items.length > 0) {
-    return { message: fetchedCount, tone: 'info' }
+  if (fetchedCount > 0) {
+    return { message: fetchedSummary, tone: 'info' }
   }
 
-  const capturedKindLabels = ITEM_KINDS.filter(kind => capturedKinds.includes(kind)).map(
-    kind => messages.kinds[kind],
+  const capturedTargetLabels = CAPTURE_TARGETS.filter(target => capturedTargets.includes(target)).map(
+    describeCaptureTarget,
   )
 
   return {
-    message: messages.captureOutcome.nothingFound(formatList(capturedKindLabels)),
+    message: messages.captureOutcome.nothingFound(formatList(capturedTargetLabels)),
     tone: 'info',
     details: describeCaptureDiagnostics(capture),
   }
