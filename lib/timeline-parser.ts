@@ -20,6 +20,7 @@ interface RawTweetResults {
 }
 
 interface RawTweetLegacy {
+  conversation_id_str?: string
   created_at?: string
   full_text?: string
   in_reply_to_status_id_str?: string
@@ -138,7 +139,8 @@ function toPostItem(tweet: ParsedTweet): CapturedItem {
   const isReply = Boolean(
     tweet.reply_to_results?.result ||
       tweet.reply_to_user_results?.result ||
-      tweet.legacy?.in_reply_to_status_id_str,
+      tweet.legacy?.in_reply_to_status_id_str ||
+      belongsToAnotherConversation(tweet),
   )
 
   return createItem({
@@ -149,6 +151,13 @@ function toPostItem(tweet: ParsedTweet): CapturedItem {
     authorHandle: readAuthorHandle(tweet),
     replyToHandle: isReply ? readReplyToHandle(tweet) : undefined,
   })
+}
+
+// A aba Respostas pode vir sem nenhum campo de resposta; o id da conversa só difere do próprio id quando o tweet responde a outro.
+function belongsToAnotherConversation(tweet: ParsedTweet): boolean {
+  const conversationId = tweet.legacy?.conversation_id_str
+
+  return conversationId !== undefined && conversationId !== tweet.rest_id
 }
 
 function toRetweetItem(retweet: ParsedTweet, retweetedResults: RawTweetResults): CapturedItem {

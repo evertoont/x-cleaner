@@ -5,6 +5,7 @@ import newLikesResponse from './fixtures/new-likes.json'
 import newRepliesResponse from './fixtures/new-user-replies.json'
 import newRepostsResponse from './fixtures/new-user-reposts.json'
 import newTweetsResponse from './fixtures/new-user-tweets.json'
+import repliesTimelineResponse from './fixtures/user-replies-timeline.json'
 import postsResponse from './fixtures/user-tweets-and-replies.json'
 
 describe('parseTimelineResponse — posts', () => {
@@ -147,6 +148,23 @@ describe('parseTimelineResponse — new x-web schema', () => {
         authorHandle: 'someone',
       }),
     ])
+  })
+})
+
+describe('parseTimelineResponse — replies timeline', () => {
+  const items = parseTimelineResponse(repliesTimelineResponse, 'replies', 'owner')
+
+  it('classifies a tweet from someone else’s conversation as a reply without reply fields', () => {
+    expect(items.find(item => item.id === '3101')).toMatchObject({
+      key: 'reply:3101',
+      kind: 'reply',
+      text: '@other minha resposta',
+      createdAt: '2024-06-01T12:00:00.000Z',
+    })
+  })
+
+  it('keeps a tweet that starts its own conversation as a tweet', () => {
+    expect(items.find(item => item.id === '3102')).toMatchObject({ key: 'tweet:3102', kind: 'tweet' })
   })
 })
 
