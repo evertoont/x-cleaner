@@ -48,9 +48,11 @@ export function describeActivity(activity: Activity): string | null {
     return progress
   }
 
-  const timeLeft = formatDuration(remainingCount * ESTIMATED_MS_PER_REMOVAL)
+  return `${progress} · ${messages.activity.timeLeft(estimateRemovalDuration(remainingCount))}`
+}
 
-  return `${progress} · ${messages.activity.timeLeft(timeLeft)}`
+export function estimateRemovalDuration(itemCount: number): string {
+  return formatDuration(itemCount * ESTIMATED_MS_PER_REMOVAL)
 }
 
 // Leitores de tela anunciam cada mudança da região de status; na exclusão, só os marcos de 10% são anunciados.

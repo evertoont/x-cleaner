@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { describeActivity, describeActivityAnnouncement } from '../lib/activity'
+import {
+  describeActivity,
+  describeActivityAnnouncement,
+  estimateRemovalDuration,
+} from '../lib/activity'
 
 describe('describeActivity', () => {
   it('says X is opening before the first section starts', () => {
@@ -22,6 +26,16 @@ describe('describeActivity', () => {
     expect(describeActivity({ type: 'removing', completed: 0, total: 1500 })).toBe(
       'Removing 0 of 1500 · about 1 hr 15 min left',
     )
+  })
+})
+
+describe('estimateRemovalDuration', () => {
+  it('rounds short removals up to a minute', () => {
+    expect(estimateRemovalDuration(3)).toBe('1 min')
+  })
+
+  it('estimates from the average time per item', () => {
+    expect(estimateRemovalDuration(42)).toBe('3 min')
   })
 })
 
