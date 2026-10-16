@@ -103,6 +103,8 @@ export const pt: Messages = {
     tabUnavailable: 'A aba do x.com foi fechada ou não respondeu. Tente de novo.',
     notLoggedIn: 'Não encontrei sua conta no x.com. Faça login e tente de novo.',
     sessionExpired: 'Sua sessão no x.com expirou. Faça login de novo e continue de onde parou.',
+    accountLocked:
+      'O X bloqueou sua conta temporariamente. Abra o x.com para desbloquear e tente de novo.',
     network: 'Não foi possível falar com o X. Verifique sua conexão.',
     removalRejected: 'O X recusou a remoção.',
     removalHttpError: (httpStatus: number) => `O X respondeu com erro ${httpStatus}.`,

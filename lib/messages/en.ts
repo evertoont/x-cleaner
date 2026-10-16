@@ -102,6 +102,7 @@ export const en = {
     tabUnavailable: 'The x.com tab was closed or stopped responding. Try again.',
     notLoggedIn: "Couldn't find your account on x.com. Log in and try again.",
     sessionExpired: 'Your x.com session expired. Log in again and pick up where you left off.',
+    accountLocked: 'X temporarily locked your account. Open x.com to unlock it, then try again.',
     network: "Couldn't reach X. Check your connection.",
     removalRejected: 'X refused the removal.',
     removalHttpError: (httpStatus: number) => `X responded with error ${httpStatus}.`,

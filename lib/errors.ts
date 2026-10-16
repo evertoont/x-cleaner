@@ -23,6 +23,13 @@ export class XSessionExpiredError extends XCleanerError {
   }
 }
 
+export class XAccountLockedError extends XCleanerError {
+  constructor() {
+    super(messages.errors.accountLocked)
+    this.name = 'XAccountLockedError'
+  }
+}
+
 export function describeError(error: unknown): string {
   if (error instanceof XCleanerError) {
     return error.message

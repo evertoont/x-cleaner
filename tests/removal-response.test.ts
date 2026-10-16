@@ -63,4 +63,14 @@ describe('interpretRemovalResponse', () => {
 
     expect(result).toEqual({ status: 'failed', message: 'X responded with error 404.' })
   })
+
+  it('reports a locked account so the queue can stop', () => {
+    const result = interpretRemovalResponse({
+      httpStatus: 403,
+      rateLimitReset: null,
+      body: { errors: [{ code: 326, message: 'To protect our users from spam…' }] },
+    })
+
+    expect(result).toEqual({ status: 'account-locked' })
+  })
 })

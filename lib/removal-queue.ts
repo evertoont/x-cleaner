@@ -1,5 +1,5 @@
 import type { RemovalBridgeRequest } from './bridge-messages'
-import { XSessionExpiredError } from './errors'
+import { XAccountLockedError, XSessionExpiredError } from './errors'
 import type { IntervalRange } from './removal-pace'
 import type { RemovalResult } from './removal-response'
 import { sleep } from './sleep'
@@ -53,6 +53,10 @@ async function removeRespectingRateLimit<Entry>(
 
     if (result.status === 'session-expired') {
       throw new XSessionExpiredError()
+    }
+
+    if (result.status === 'account-locked') {
+      throw new XAccountLockedError()
     }
 
     if (result.status !== 'rate-limited') {

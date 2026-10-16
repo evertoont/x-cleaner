@@ -4,6 +4,7 @@ export type RemovalResult =
   | { status: 'removed' }
   | { status: 'rate-limited'; retryAt?: number }
   | { status: 'session-expired' }
+  | { status: 'account-locked' }
   | { status: 'failed'; message: string }
 
 export interface RemovalResponse {
@@ -18,6 +19,7 @@ interface GraphqlError {
 }
 
 const RATE_LIMIT_ERROR_CODE = 88
+const ACCOUNT_LOCKED_ERROR_CODE = 326
 const NOT_FOUND_ERROR_CODES = [34, 144]
 
 export function interpretRemovalResponse(response: RemovalResponse): RemovalResult {
@@ -35,6 +37,10 @@ export function interpretRemovalResponse(response: RemovalResponse): RemovalResu
 
   if (errors.some(error => error.code === RATE_LIMIT_ERROR_CODE)) {
     return { status: 'rate-limited', retryAt: parseRateLimitReset(rateLimitReset) }
+  }
+
+  if (errors.some(error => error.code === ACCOUNT_LOCKED_ERROR_CODE)) {
+    return { status: 'account-locked' }
   }
 
   // Item que já não existe no X conta como removido.
