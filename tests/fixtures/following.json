@@ -1,0 +1,340 @@
+{
+  "data": {
+    "user": {
+      "result": {
+        "__typename": "User",
+        "timeline": {
+          "timeline": {
+            "instructions": [
+              {
+                "type": "TimelineClearCache"
+              },
+              {
+                "direction": "Top",
+                "type": "TimelineTerminateTimeline"
+              },
+              {
+                "entries": [
+                  {
+                    "content": {
+                      "__typename": "TimelineTimelineItem",
+                      "clientEventInfo": {
+                        "component": "FollowingSgs",
+                        "element": "user"
+                      },
+                      "entryType": "TimelineTimelineItem",
+                      "itemContent": {
+                        "__typename": "TimelineUser",
+                        "itemType": "TimelineUser",
+                        "userDisplayType": "User",
+                        "user_results": {
+                          "result": {
+                            "__typename": "User",
+                            "id": "VXNlcjo1MDAx",
+                            "rest_id": "5001",
+                            "avatar": {
+                              "image_url": "https://pbs.twimg.com/profile_images/5001/avatar_normal.png"
+                            },
+                            "core": {
+                              "created_at": "Mon Jan 01 12:00:00 +0000 2018",
+                              "name": "Recent Follow",
+                              "screen_name": "recent_follow"
+                            },
+                            "is_blue_verified": true,
+                            "profile_bio": {
+                              "description": "Café &amp; código",
+                              "entities": {
+                                "description": {
+                                  "urls": []
+                                }
+                              }
+                            },
+                            "relationship_counts": {
+                              "followers": 4488,
+                              "following": 100
+                            },
+                            "relationship_perspectives": {
+                              "blocked_by": false,
+                              "blocking": false,
+                              "followed_by": false,
+                              "following": true,
+                              "live_following": false,
+                              "muting": false
+                            },
+                            "verification": {
+                              "verified": false
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "entryId": "user-5001",
+                    "sortIndex": "9005"
+                  },
+                  {
+                    "content": {
+                      "__typename": "TimelineTimelineItem",
+                      "clientEventInfo": {
+                        "component": "FollowingSgs",
+                        "element": "user"
+                      },
+                      "entryType": "TimelineTimelineItem",
+                      "itemContent": {
+                        "__typename": "TimelineUser",
+                        "itemType": "TimelineUser",
+                        "userDisplayType": "User",
+                        "user_results": {
+                          "result": {
+                            "__typename": "User",
+                            "id": "VXNlcjo1MDAy",
+                            "rest_id": "5002",
+                            "avatar": {
+                              "image_url": "https://pbs.twimg.com/profile_images/5002/avatar_normal.png"
+                            },
+                            "core": {
+                              "created_at": "Mon Jan 01 12:00:00 +0000 2018",
+                              "name": "Mutual Friend",
+                              "screen_name": "mutual_friend"
+                            },
+                            "is_blue_verified": false,
+                            "profile_bio": {
+                              "description": "Follows back",
+                              "entities": {
+                                "description": {
+                                  "urls": []
+                                }
+                              }
+                            },
+                            "relationship_counts": {
+                              "followers": 120,
+                              "following": 100
+                            },
+                            "relationship_perspectives": {
+                              "blocked_by": false,
+                              "blocking": false,
+                              "followed_by": true,
+                              "following": true,
+                              "live_following": false,
+                              "muting": false
+                            },
+                            "verification": {
+                              "verified": false
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "entryId": "user-5002",
+                    "sortIndex": "9004"
+                  },
+                  {
+                    "content": {
+                      "__typename": "TimelineTimelineItem",
+                      "clientEventInfo": {
+                        "component": "FollowingSgs",
+                        "element": "user"
+                      },
+                      "entryType": "TimelineTimelineItem",
+                      "itemContent": {
+                        "__typename": "TimelineUser",
+                        "itemType": "TimelineUser",
+                        "userDisplayType": "User",
+                        "user_results": {
+                          "result": {
+                            "__typename": "User",
+                            "id": "VXNlcjo1MDA0",
+                            "rest_id": "5004",
+                            "avatar": {
+                              "image_url": "https://pbs.twimg.com/profile_images/5004/avatar_normal.png"
+                            },
+                            "core": {
+                              "created_at": "Mon Jan 01 12:00:00 +0000 2018",
+                              "name": "Suggested",
+                              "screen_name": "suggested"
+                            },
+                            "is_blue_verified": false,
+                            "profile_bio": {
+                              "description": "Not followed",
+                              "entities": {
+                                "description": {
+                                  "urls": []
+                                }
+                              }
+                            },
+                            "relationship_counts": {
+                              "followers": 50,
+                              "following": 100
+                            },
+                            "relationship_perspectives": {
+                              "blocked_by": false,
+                              "blocking": false,
+                              "followed_by": false,
+                              "following": false,
+                              "live_following": false,
+                              "muting": false
+                            },
+                            "verification": {
+                              "verified": false
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "entryId": "user-5004",
+                    "sortIndex": "9003"
+                  },
+                  {
+                    "content": {
+                      "__typename": "TimelineTimelineItem",
+                      "clientEventInfo": {
+                        "component": "FollowingSgs",
+                        "element": "user"
+                      },
+                      "entryType": "TimelineTimelineItem",
+                      "itemContent": {
+                        "__typename": "TimelineUser",
+                        "itemType": "TimelineUser",
+                        "userDisplayType": "User",
+                        "user_results": {
+                          "result": {
+                            "__typename": "UserUnavailable",
+                            "reason": "Suspended"
+                          }
+                        }
+                      }
+                    },
+                    "entryId": "user-9002",
+                    "sortIndex": "9002"
+                  },
+                  {
+                    "content": {
+                      "__typename": "TimelineTimelineItem",
+                      "clientEventInfo": {
+                        "component": "FollowingSgs",
+                        "element": "user"
+                      },
+                      "entryType": "TimelineTimelineItem",
+                      "itemContent": {
+                        "__typename": "TimelineUser",
+                        "itemType": "TimelineUser",
+                        "userDisplayType": "User",
+                        "user_results": {
+                          "result": {
+                            "__typename": "User",
+                            "id": "VXNlcjo1MDAz",
+                            "rest_id": "5003",
+                            "avatar": {
+                              "image_url": "https://pbs.twimg.com/profile_images/5003/avatar_normal.png"
+                            },
+                            "core": {
+                              "created_at": "Mon Jan 01 12:00:00 +0000 2018",
+                              "name": "Big News",
+                              "screen_name": "big_news"
+                            },
+                            "is_blue_verified": false,
+                            "profile_bio": {
+                              "description": "Breaking news",
+                              "entities": {
+                                "description": {
+                                  "urls": []
+                                }
+                              }
+                            },
+                            "relationship_counts": {
+                              "followers": 9800000,
+                              "following": 100
+                            },
+                            "relationship_perspectives": {
+                              "blocked_by": false,
+                              "blocking": false,
+                              "followed_by": false,
+                              "following": true,
+                              "live_following": false,
+                              "muting": false
+                            },
+                            "verification": {
+                              "verified": true
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "entryId": "user-5003",
+                    "sortIndex": "9001"
+                  },
+                  {
+                    "content": {
+                      "__typename": "TimelineTimelineItem",
+                      "clientEventInfo": {
+                        "component": "FollowingSgs",
+                        "element": "user"
+                      },
+                      "entryType": "TimelineTimelineItem",
+                      "itemContent": {
+                        "__typename": "TimelineUser",
+                        "itemType": "TimelineUser",
+                        "userDisplayType": "User",
+                        "user_results": {
+                          "result": {
+                            "__typename": "User",
+                            "id": "VXNlcjo1MDAx",
+                            "rest_id": "5001",
+                            "avatar": {
+                              "image_url": "https://pbs.twimg.com/profile_images/5001/avatar_normal.png"
+                            },
+                            "core": {
+                              "created_at": "Mon Jan 01 12:00:00 +0000 2018",
+                              "name": "Recent Follow",
+                              "screen_name": "recent_follow"
+                            },
+                            "is_blue_verified": true,
+                            "profile_bio": {
+                              "description": "Café &amp; código",
+                              "entities": {
+                                "description": {
+                                  "urls": []
+                                }
+                              }
+                            },
+                            "relationship_counts": {
+                              "followers": 4488,
+                              "following": 100
+                            },
+                            "relationship_perspectives": {
+                              "blocked_by": false,
+                              "blocking": false,
+                              "followed_by": false,
+                              "following": true,
+                              "live_following": false,
+                              "muting": false
+                            },
+                            "verification": {
+                              "verified": false
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "entryId": "user-5001",
+                    "sortIndex": "9000"
+                  },
+                  {
+                    "content": {
+                      "__typename": "TimelineTimelineCursor",
+                      "cursorType": "Bottom",
+                      "entryType": "TimelineTimelineCursor",
+                      "value": "cursor-value"
+                    },
+                    "entryId": "cursor-bottom-1",
+                    "sortIndex": "1"
+                  }
+                ],
+                "type": "TimelineAddEntries"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
