@@ -1,5 +1,4 @@
 import type { Account, PeopleList } from '../lib/accounts'
-import { messages } from '../lib/i18n'
 import { AccountRow } from './AccountRow'
 
 interface AccountListProps {
@@ -7,18 +6,20 @@ interface AccountListProps {
   accounts: Account[]
   selectedKeys: ReadonlySet<string>
   isSelectionLocked: boolean
+  emptyTitle: string
+  emptyDescription: string
   onToggle: (accountKey: string) => void
 }
 
 export function AccountList(props: AccountListProps) {
-  const { list, accounts, selectedKeys, isSelectionLocked, onToggle } = props
-  const listMessages = messages.people.lists[list]
+  const { list, accounts, selectedKeys, isSelectionLocked, emptyTitle, emptyDescription, onToggle } =
+    props
 
   if (accounts.length === 0) {
     return (
       <div className="empty-state">
-        <p className="empty-state-title">{listMessages.emptyTitle}</p>
-        <p className="empty-state-description">{listMessages.emptyDescription}</p>
+        <p className="empty-state-title">{emptyTitle}</p>
+        <p className="empty-state-description">{emptyDescription}</p>
       </div>
     )
   }

@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { mergeAccounts, selectFollowers, selectNonFollowers, sortAccounts } from '../lib/accounts'
+import {
+  countFollowersByFilter,
+  filterFollowers,
+  mergeAccounts,
+  selectFollowers,
+  selectNonFollowers,
+  sortAccounts,
+} from '../lib/accounts'
 import { parseTimelineUsers } from '../lib/user-timeline-parser'
 import type { ParsedAccount } from '../lib/user-timeline-parser'
 import followersResponse from './fixtures/followers.json'
@@ -68,6 +75,30 @@ describe('selectFollowers', () => {
 
   it('keeps the following count to help spot bots', () => {
     expect(followers[0]).toMatchObject({ followersCount: 830, followingCount: 100 })
+  })
+})
+
+describe('filterFollowers', () => {
+  const followers = selectFollowers(parseTimelineUsers(followersResponse))
+
+  it('keeps everyone with the all filter', () => {
+    expect(filterFollowers(followers, 'all').map(account => account.handle)).toEqual([
+      'mutual_follower',
+      'one_way',
+    ])
+  })
+
+  it('keeps only mutual follows or only the ones you do not follow back', () => {
+    expect(filterFollowers(followers, 'mutual').map(account => account.handle)).toEqual([
+      'mutual_follower',
+    ])
+    expect(filterFollowers(followers, 'notFollowedBack').map(account => account.handle)).toEqual([
+      'one_way',
+    ])
+  })
+
+  it('counts followers for each filter', () => {
+    expect(countFollowersByFilter(followers)).toEqual({ all: 2, mutual: 1, notFollowedBack: 1 })
   })
 })
 

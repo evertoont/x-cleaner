@@ -32,6 +32,14 @@ export const pt: Messages = {
           'Marque Seguidores em Capturar do X e clique em Capturar para listar quem te segue.',
       },
     },
+    followerFilterLabel: 'Mostrar',
+    followerFilters: {
+      all: 'Todos',
+      mutual: 'Mútuos',
+      notFollowedBack: 'Você não segue de volta',
+    },
+    noFilterMatchesTitle: 'Ninguém aqui',
+    noFilterMatchesDescription: 'Nenhum seguidor corresponde a este filtro.',
     sortLabel: 'Ordenar por',
     sorts: {
       recent: 'Mais recentes primeiro',

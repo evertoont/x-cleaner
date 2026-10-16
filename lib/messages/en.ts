@@ -30,6 +30,14 @@ export const en = {
         emptyDescription: 'Check Followers under Fetch from X, then click Fetch to list who follows you.',
       },
     },
+    followerFilterLabel: 'Show',
+    followerFilters: {
+      all: 'All',
+      mutual: 'Mutual follows',
+      notFollowedBack: "You don't follow back",
+    },
+    noFilterMatchesTitle: 'Nobody here',
+    noFilterMatchesDescription: 'No followers match this filter.',
     sortLabel: 'Sort by',
     sorts: {
       recent: 'Newest first',

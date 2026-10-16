@@ -23,6 +23,8 @@ export interface Account {
 
 export type AccountSort = 'recent' | 'mostFollowers' | 'fewestFollowers'
 
+export type FollowerFilter = 'all' | 'mutual' | 'notFollowedBack'
+
 export const PEOPLE_LISTS: PeopleList[] = ['nonFollowers', 'followers']
 
 export const PEOPLE_LIST_ACTIONS: Record<PeopleList, AccountAction> = {
@@ -31,6 +33,8 @@ export const PEOPLE_LIST_ACTIONS: Record<PeopleList, AccountAction> = {
 }
 
 export const ACCOUNT_SORTS: AccountSort[] = ['recent', 'mostFollowers', 'fewestFollowers']
+
+export const FOLLOWER_FILTERS: FollowerFilter[] = ['all', 'mutual', 'notFollowedBack']
 
 const ACCOUNT_COMPARATORS: Record<AccountSort, (first: Account, second: Account) => number> = {
   recent: (first, second) => first.listOrder - second.listOrder,
@@ -57,6 +61,28 @@ export function selectFollowers(followerAccounts: ParsedAccount[]): Account[] {
 
 export function sortAccounts(accounts: Account[], sort: AccountSort): Account[] {
   return [...accounts].sort(ACCOUNT_COMPARATORS[sort])
+}
+
+export function matchesFollowerFilter(account: Account, filter: FollowerFilter): boolean {
+  if (filter === 'all') {
+    return true
+  }
+
+  return filter === 'mutual' ? account.isMutual : !account.isMutual
+}
+
+export function filterFollowers(accounts: Account[], filter: FollowerFilter): Account[] {
+  return accounts.filter(account => matchesFollowerFilter(account, filter))
+}
+
+export function countFollowersByFilter(accounts: Account[]): Record<FollowerFilter, number> {
+  const mutualCount = accounts.filter(account => account.isMutual).length
+
+  return {
+    all: accounts.length,
+    mutual: mutualCount,
+    notFollowedBack: accounts.length - mutualCount,
+  }
 }
 
 export function mergeAccounts(currentAccounts: Account[], capturedAccounts: Account[]): Account[] {

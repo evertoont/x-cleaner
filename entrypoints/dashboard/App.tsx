@@ -4,6 +4,7 @@ import { AccountList } from '../../components/AccountList'
 import { AccountSortSelect } from '../../components/AccountSortSelect'
 import { ActionBar } from '../../components/ActionBar'
 import { CaptureControls } from '../../components/CaptureControls'
+import { FollowerFilterControl } from '../../components/FollowerFilterControl'
 import { ItemList } from '../../components/ItemList'
 import { KindNav } from '../../components/KindNav'
 import { PeopleNav } from '../../components/PeopleNav'
@@ -12,8 +13,15 @@ import { useAccountList } from '../../hooks/use-account-list'
 import { useCapturedItems } from '../../hooks/use-captured-items'
 import { useSelection } from '../../hooks/use-selection'
 import { planAccountRemovals, runAccountRemovals } from '../../lib/account-removals'
-import { mergeAccounts, PEOPLE_LIST_ACTIONS, sortAccounts } from '../../lib/accounts'
-import type { Account, AccountSort, PeopleList } from '../../lib/accounts'
+import {
+  countFollowersByFilter,
+  filterFollowers,
+  matchesFollowerFilter,
+  mergeAccounts,
+  PEOPLE_LIST_ACTIONS,
+  sortAccounts,
+} from '../../lib/accounts'
+import type { Account, AccountSort, FollowerFilter, PeopleList } from '../../lib/accounts'
 import type { Activity, Notice } from '../../lib/activity'
 import { captureItems } from '../../lib/capture-items'
 import { CAPTURE_TARGETS, describeCaptureTarget, isItemKind } from '../../lib/capture-modes'
@@ -45,6 +53,7 @@ export function App() {
   const [activeView, setActiveView] = useState<DashboardView>({ type: 'posts', kind: 'tweet' })
   const [captureTargets, setCaptureTargets] = useState<CaptureTarget[]>(CAPTURE_TARGETS)
   const [accountSort, setAccountSort] = useState<AccountSort>('recent')
+  const [followerFilter, setFollowerFilter] = useState<FollowerFilter>('all')
   const [activity, setActivity] = useState<Activity>({ type: 'idle' })
   const [notice, setNotice] = useState<Notice | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -66,14 +75,16 @@ export function App() {
     () => sortAccounts(activeAccounts, accountSort),
     [activeAccounts, accountSort],
   )
+  const listedAccounts =
+    activeList === 'followers' ? filterFollowers(sortedAccounts, followerFilter) : sortedAccounts
 
   const selectedItems = items.filter(item => postSelection.selectedKeys.has(item.key))
   const selectedCountsByKind = countItemsByKind(selectedItems)
-  const selectedAccounts = sortedAccounts.filter(account =>
+  const selectedAccounts = listedAccounts.filter(account =>
     activeSelection.selectedKeys.has(account.key),
   )
 
-  const visibleEntries: SelectableEntry[] = activeList ? sortedAccounts : visibleItems
+  const visibleEntries: SelectableEntry[] = activeList ? listedAccounts : visibleItems
   const visibleKeys = visibleEntries.map(entry => entry.key)
   const unselectedFailedKeys = visibleEntries
     .filter(entry => entry.status === 'failed' && !activeSelection.selectedKeys.has(entry.key))
@@ -272,6 +283,15 @@ export function App() {
     void handleRemovePosts()
   }
 
+  function handleChangeFollowerFilter(filter: FollowerFilter) {
+    const hiddenKeys = followerList.accounts
+      .filter(account => !matchesFollowerFilter(account, filter))
+      .map(account => account.key)
+
+    followerSelection.deselectKeys(hiddenKeys)
+    setFollowerFilter(filter)
+  }
+
   function handleStop() {
     abortControllerRef.current?.abort()
   }
@@ -335,6 +355,14 @@ export function App() {
             {activeList && <AccountSortSelect sort={accountSort} onChangeSort={setAccountSort} />}
           </header>
 
+          {activeList === 'followers' && (
+            <FollowerFilterControl
+              filter={followerFilter}
+              countsByFilter={countFollowersByFilter(followerList.accounts)}
+              onChangeFilter={handleChangeFollowerFilter}
+            />
+          )}
+
           <ActionBar
             activity={activity}
             notice={notice}
@@ -370,9 +398,19 @@ export function App() {
           ) : (
             <AccountList
               list={activeView.list}
-              accounts={sortedAccounts}
+              accounts={listedAccounts}
               selectedKeys={activeSelection.selectedKeys}
               isSelectionLocked={isBusy}
+              emptyTitle={
+                activeAccounts.length > 0
+                  ? messages.people.noFilterMatchesTitle
+                  : messages.people.lists[activeView.list].emptyTitle
+              }
+              emptyDescription={
+                activeAccounts.length > 0
+                  ? messages.people.noFilterMatchesDescription
+                  : messages.people.lists[activeView.list].emptyDescription
+              }
               onToggle={activeSelection.toggleKey}
             />
           )}

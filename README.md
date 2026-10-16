@@ -31,7 +31,7 @@ It works with your normal x.com session. There is no account to create, no serve
 - **Visible progress.** See how many items are left and an estimate of the time remaining. Stop at any time; anything not removed stays in the list.
 - **Failures are kept.** Items that fail stay in the list with the reason, and you can select them all to try again.
 - **Not following back.** See who you follow that doesn't follow you, with verified badges and follower counts so you can skip news sites and public figures, sort the list and unfollow in bulk.
-- **Followers.** See who follows you, whether you follow them back, and their follower and following counts, then remove the followers you choose. They are not notified, but they can follow you again.
+- **Followers.** See who follows you, whether you follow them back, and their follower and following counts. Filter mutual follows or the ones you don't follow back, then remove the followers you choose. They are not notified, but they can follow you again.
 - **Gentle with your account.** Unfollows and follower removals go one at a time, 5 to 8 seconds apart, and stop at 150 per day each; the rest stay selected for later.
 - **Rate-limit aware.** When X limits requests, the extension waits and resumes on its own.
 - **English and Portuguese**, following your browser language.
