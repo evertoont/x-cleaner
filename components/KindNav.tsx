@@ -1,21 +1,13 @@
-import { Heart, MessageSquare, Repeat2, Reply } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
 import { messages } from '../lib/i18n'
 import { ITEM_KINDS } from '../lib/items'
 import type { ItemKind, KindCounts } from '../lib/items'
+import { KIND_ICONS } from './kind-icons'
 
 interface KindNavProps {
   activeKind: ItemKind
   countsByKind: KindCounts
   selectedCountsByKind: KindCounts
   onSelectKind: (kind: ItemKind) => void
-}
-
-const KIND_ICONS: Record<ItemKind, LucideIcon> = {
-  tweet: MessageSquare,
-  reply: Reply,
-  retweet: Repeat2,
-  like: Heart,
 }
 
 export function KindNav(props: KindNavProps) {
