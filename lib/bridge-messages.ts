@@ -9,6 +9,8 @@ export type BridgeRequest =
   | { type: 'stop-capture' }
   | { type: 'remove'; item: CapturedItem }
 
+export type RemovalBridgeRequest = Extract<BridgeRequest, { type: 'remove' }>
+
 export interface BridgeResponses {
   'detect-handle': XSession | null
   capture: CaptureResult

@@ -13,9 +13,9 @@ import { formatList, messages } from '../../lib/i18n'
 import { countItemsByKind, ITEM_KINDS, mergeItems, replaceItemsOfKinds } from '../../lib/items'
 import type { CapturedItem, ItemKind } from '../../lib/items'
 import type { CaptureResult } from '../../lib/page-capture'
-import { removeItems } from '../../lib/remove-items'
-import type { SettledRemoval } from '../../lib/remove-items'
+import type { SettledRemoval } from '../../lib/removal-queue'
 import { describeRemovalOutcome } from '../../lib/removal-summary'
+import { removeItems } from '../../lib/remove-items'
 import { focusCurrentTab } from '../../lib/x-tab'
 
 export function App() {

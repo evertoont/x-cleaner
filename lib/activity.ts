@@ -1,6 +1,6 @@
 import type { CaptureSection } from './capture-items'
 import { LOCALE, messages } from './i18n'
-import { ESTIMATED_MS_PER_REMOVAL } from './remove-items'
+import { ESTIMATED_MS_PER_REMOVAL } from './removal-pace'
 
 export type Activity =
   | { type: 'idle' }
