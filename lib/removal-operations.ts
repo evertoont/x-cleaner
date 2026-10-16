@@ -1,6 +1,10 @@
 import type { CapturedItem } from './items'
 
-export type RemovalOperationName = 'DeleteTweet' | 'DeleteRetweet' | 'UnfavoriteTweet'
+export type RemovalOperationName =
+  | 'DeleteTweet'
+  | 'DeleteRetweet'
+  | 'UnfavoriteTweet'
+  | 'RemoveFollower'
 
 export interface RemovalRequest {
   operationName: RemovalOperationName
@@ -11,6 +15,7 @@ export const REMOVAL_QUERY_IDS: Record<RemovalOperationName, string> = {
   DeleteTweet: 'VaenaVgh5q5ih7kvyVjgtg',
   DeleteRetweet: 'iQtK4dl5hBmXewYZuEOKVw',
   UnfavoriteTweet: 'ZYKSe-w7KEslx3JhSIk5LA',
+  RemoveFollower: 'QpNfg0kpPRfjROQ_9eOLXA',
 }
 
 export function buildRemovalRequest(item: CapturedItem): RemovalRequest {

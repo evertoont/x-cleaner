@@ -1,5 +1,6 @@
 import { browser } from 'wxt/browser'
 import { defineContentScript } from 'wxt/utils/define-content-script'
+import { requestRemoveFollower, requestUnfollow } from '../lib/account-requests'
 import { isBridgeRequest } from '../lib/bridge-messages'
 import type { BridgeRequest, BridgeResponses } from '../lib/bridge-messages'
 import { captureTimeline, detectSession, stopCapture } from '../lib/page-capture'
@@ -50,6 +51,14 @@ function handleBridgeRequest(
   if (request.type === 'stop-capture') {
     stopCapture()
     return Promise.resolve(true)
+  }
+
+  if (request.type === 'unfollow') {
+    return requestUnfollow(request.account)
+  }
+
+  if (request.type === 'remove-follower') {
+    return requestRemoveFollower(request.account)
   }
 
   return requestRemoval(request.item)

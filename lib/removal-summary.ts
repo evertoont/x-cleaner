@@ -1,4 +1,5 @@
-import { capitalizeFirstLetter, formatList, messages } from './i18n'
+import type { AccountAction } from './accounts'
+import { capitalizeFirstLetter, formatDayAndTime, formatList, messages } from './i18n'
 import { ITEM_KIND_REMOVAL_ACTIONS, ITEM_KINDS } from './items'
 import type { ItemKind, KindCounts, RemovalAction } from './items'
 
@@ -49,6 +50,31 @@ export function describeRemovalOutcome(
   const failedSentences = failedCount > 0 ? [messages.removal.failed(failedCount)] : []
 
   return [...stoppedSentences, removedSummary, ...failedSentences].join(' ')
+}
+
+export interface AccountRemovalOutcome {
+  action: AccountAction
+  processedCount: number
+  failedCount: number
+  heldBackCount: number
+  quotaResumeAt: Date
+  wasStopped: boolean
+}
+
+export function describeAccountRemovalOutcome(outcome: AccountRemovalOutcome): string {
+  const { action, processedCount, failedCount, heldBackCount, quotaResumeAt, wasStopped } = outcome
+  const actionMessages = messages.accountActions[action]
+  const processedSummary =
+    processedCount > 0 ? actionMessages.done(processedCount) : actionMessages.nobody
+
+  const stoppedSentences = wasStopped ? [messages.removal.stopped] : []
+  const failedSentences = failedCount > 0 ? [messages.accountRemoval.failed(failedCount)] : []
+  const heldBackSentences =
+    heldBackCount > 0
+      ? [messages.accountRemoval.heldBack(heldBackCount, formatDayAndTime(quotaResumeAt))]
+      : []
+
+  return [...stoppedSentences, processedSummary, ...failedSentences, ...heldBackSentences].join(' ')
 }
 
 function listCountedKinds(countsByKind: KindCounts): ItemKind[] {

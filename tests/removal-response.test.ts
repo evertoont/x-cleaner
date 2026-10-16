@@ -73,4 +73,14 @@ describe('interpretRemovalResponse', () => {
 
     expect(result).toEqual({ status: 'account-locked' })
   })
+
+  it('treats an account that no longer exists as already unfollowed', () => {
+    const result = interpretRemovalResponse({
+      httpStatus: 404,
+      rateLimitReset: null,
+      body: { errors: [{ code: 50, message: 'User not found.' }] },
+    })
+
+    expect(result).toEqual({ status: 'removed' })
+  })
 })

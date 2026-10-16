@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
+import { formatDayAndTime } from '../lib/i18n'
 import type { KindCounts } from '../lib/items'
 import {
+  describeAccountRemovalOutcome,
   describeRemovalActions,
   describeRemovalOutcome,
   selectRemovalAction,
@@ -56,5 +58,63 @@ describe('describeRemovalOutcome', () => {
     expect(describeRemovalOutcome(buildCounts({}), 1, false)).toBe(
       'Nothing was removed. 1 item failed and is still in the list.',
     )
+  })
+})
+
+describe('describeAccountRemovalOutcome', () => {
+  const quotaResumeAt = new Date(2026, 9, 16, 14, 5)
+
+  it('counts the unfollowed accounts', () => {
+    expect(
+      describeAccountRemovalOutcome({
+        action: 'unfollow',
+        processedCount: 12,
+        failedCount: 0,
+        heldBackCount: 0,
+        quotaResumeAt,
+        wasStopped: false,
+      }),
+    ).toBe('12 accounts unfollowed.')
+  })
+
+  it('counts the removed followers', () => {
+    expect(
+      describeAccountRemovalOutcome({
+        action: 'removeFollower',
+        processedCount: 1,
+        failedCount: 0,
+        heldBackCount: 0,
+        quotaResumeAt,
+        wasStopped: false,
+      }),
+    ).toBe('1 follower removed.')
+  })
+
+  it('mentions failures and the accounts held back by the daily limit', () => {
+    expect(
+      describeAccountRemovalOutcome({
+        action: 'unfollow',
+        processedCount: 1,
+        failedCount: 1,
+        heldBackCount: 30,
+        quotaResumeAt,
+        wasStopped: false,
+      }),
+    ).toBe(
+      `1 account unfollowed. 1 account failed and is still in the list. Daily limit reached: 30 accounts stay selected. Continue after ${formatDayAndTime(quotaResumeAt)}.`,
+    )
+  })
+
+  it('mentions the stop when nothing was done', () => {
+    expect(
+      describeAccountRemovalOutcome({
+        action: 'removeFollower',
+        processedCount: 0,
+        failedCount: 0,
+        heldBackCount: 0,
+        quotaResumeAt,
+        wasStopped: true,
+      }),
+    ).toBe('Stopped. No follower was removed.')
   })
 })

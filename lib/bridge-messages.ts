@@ -1,3 +1,4 @@
+import type { Account } from './accounts'
 import type { CaptureMode } from './capture-modes'
 import type { CapturedItem } from './items'
 import type { CaptureResult, XSession } from './page-capture'
@@ -8,14 +9,21 @@ export type BridgeRequest =
   | { type: 'capture'; mode: CaptureMode; ownerHandle: string }
   | { type: 'stop-capture' }
   | { type: 'remove'; item: CapturedItem }
+  | { type: 'unfollow'; account: Account }
+  | { type: 'remove-follower'; account: Account }
 
-export type RemovalBridgeRequest = Extract<BridgeRequest, { type: 'remove' }>
+export type RemovalBridgeRequest = Extract<
+  BridgeRequest,
+  { type: 'remove' | 'unfollow' | 'remove-follower' }
+>
 
 export interface BridgeResponses {
   'detect-handle': XSession | null
   capture: CaptureResult
   'stop-capture': true
   remove: RemovalResult
+  unfollow: RemovalResult
+  'remove-follower': RemovalResult
 }
 
 const BRIDGE_REQUEST_TYPES: BridgeRequest['type'][] = [
@@ -23,6 +31,8 @@ const BRIDGE_REQUEST_TYPES: BridgeRequest['type'][] = [
   'capture',
   'stop-capture',
   'remove',
+  'unfollow',
+  'remove-follower',
 ]
 
 export function isBridgeRequest(message: unknown): message is BridgeRequest {

@@ -20,7 +20,7 @@ interface GraphqlError {
 
 const RATE_LIMIT_ERROR_CODE = 88
 const ACCOUNT_LOCKED_ERROR_CODE = 326
-const NOT_FOUND_ERROR_CODES = [34, 144]
+const NOT_FOUND_ERROR_CODES = [34, 50, 144]
 
 export function interpretRemovalResponse(response: RemovalResponse): RemovalResult {
   const { httpStatus, rateLimitReset, body } = response
