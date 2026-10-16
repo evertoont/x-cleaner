@@ -38,7 +38,7 @@ describe('buildSectionUrl', () => {
 
     expect(buildSectionUrl('posts', session)).toBe('https://x.com/owner')
     expect(buildSectionUrl('replies', session)).toBe('https://x.com/owner/with_replies')
-    expect(buildSectionUrl('reposts', session)).toBe('https://x.com/owner')
+    expect(buildSectionUrl('reposts', session)).toBe('https://x.com/owner/reposts')
     expect(buildSectionUrl('likes', session)).toBe('https://x.com/owner/likes')
   })
 })

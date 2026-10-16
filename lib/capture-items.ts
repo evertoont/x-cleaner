@@ -18,12 +18,12 @@ type SectionStartHandler = (section: CaptureSection) => void
 
 const CAPTURE_MODES: CaptureMode[] = ['posts', 'replies', 'reposts', 'likes']
 
-// No app antigo os retweets ficam misturados aos posts; no novo, têm aba própria.
+// Os dois apps têm aba própria de reposts (o perfil principal só mostra originais); só as curtidas mudam de lugar.
 const SECTION_URL_BUILDERS: Record<XWebApp, Record<CaptureMode, SectionUrlBuilder>> = {
   'responsive-web': {
     posts: ownerHandle => `https://x.com/${ownerHandle}`,
     replies: ownerHandle => `https://x.com/${ownerHandle}/with_replies`,
-    reposts: ownerHandle => `https://x.com/${ownerHandle}`,
+    reposts: ownerHandle => `https://x.com/${ownerHandle}/reposts`,
     likes: ownerHandle => `https://x.com/${ownerHandle}/likes`,
   },
   'x-web': {
