@@ -53,7 +53,6 @@ export const en = {
       retweet: (count: number) => `undo ${countOf(count, 'repost', 'reposts')}`,
       like: (count: number) => `remove ${countOf(count, 'like', 'likes')}`,
     },
-    confirm: (actionSummary: string) => `${actionSummary}? This can't be undone.`,
     done: {
       tweet: (count: number) => `${countOf(count, 'post', 'posts')} deleted`,
       reply: (count: number) => `${countOf(count, 'reply', 'replies')} deleted`,

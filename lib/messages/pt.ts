@@ -54,7 +54,6 @@ export const pt: Messages = {
       retweet: (count: number) => `desfazer ${countOf(count, 'repost', 'reposts')}`,
       like: (count: number) => `remover ${countOf(count, 'curtida', 'curtidas')}`,
     },
-    confirm: (actionSummary: string) => `${actionSummary}? Não dá para reverter.`,
     done: {
       tweet: (count: number) => countOf(count, 'post apagado', 'posts apagados'),
       reply: (count: number) => countOf(count, 'resposta apagada', 'respostas apagadas'),

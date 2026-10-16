@@ -32,14 +32,6 @@ export function describeRemovalActions(selectedCounts: KindCounts): RemovalActio
   }))
 }
 
-export function describeRemovalConfirmation(selectedCounts: KindCounts): string {
-  const actionPhrases = listCountedKinds(selectedCounts).map(kind =>
-    messages.removal.confirmActions[kind](selectedCounts[kind]),
-  )
-
-  return messages.removal.confirm(capitalizeFirstLetter(formatList(actionPhrases)))
-}
-
 export function describeRemovalOutcome(
   removedCounts: KindCounts,
   failedCount: number,

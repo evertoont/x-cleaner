@@ -1,14 +1,14 @@
 import { HeartOff, Square, Trash2, TriangleAlert, Undo2 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useState } from 'react'
-import type { KeyboardEvent } from 'react'
 import { describeActivity, describeActivityAnnouncement } from '../lib/activity'
 import type { Activity, Notice } from '../lib/activity'
 import { messages } from '../lib/i18n'
 import { sumKindCounts } from '../lib/items'
 import type { ItemKind, KindCounts } from '../lib/items'
-import { describeRemovalConfirmation, selectRemovalAction } from '../lib/removal-summary'
+import { selectRemovalAction } from '../lib/removal-summary'
 import type { RemovalButtonAction } from '../lib/removal-summary'
+import { ConfirmRemovalDialog } from './ConfirmRemovalDialog'
 import { ProgressBar } from './ProgressBar'
 
 interface ActionBarProps {
@@ -53,8 +53,6 @@ export function ActionBar(props: ActionBarProps) {
   const selectedCount = sumKindCounts(selectedCounts)
   const isBusy = activity.type !== 'idle'
   const isRemoving = activity.type === 'removing'
-  const isConfirmVisible = isConfirming && selectedCount > 0 && !isBusy
-  const isReviewing = !isBusy && !isConfirmVisible
 
   const activityMessage = describeActivity(activity)
   const statusMessage = activityMessage ?? notice?.message
@@ -70,16 +68,8 @@ export function ActionBar(props: ActionBarProps) {
     onRemove()
   }
 
-  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    if (event.key !== 'Escape' || !isConfirmVisible) {
-      return
-    }
-
-    setIsConfirming(false)
-  }
-
   return (
-    <div className="toolbar" onKeyDown={handleKeyDown}>
+    <div className="toolbar">
       <div className="toolbar-row">
         <label className="select-all">
           <input
@@ -91,15 +81,9 @@ export function ActionBar(props: ActionBarProps) {
           {messages.toolbar.selectAll}
         </label>
 
-        {isConfirmVisible ? (
-          <p className="toolbar-status toolbar-confirm" role="alert">
-            {describeRemovalConfirmation(selectedCounts)}
-          </p>
-        ) : (
-          <p className="toolbar-status" data-tone={statusTone}>
-            {statusMessage}
-          </p>
-        )}
+        <p className="toolbar-status" data-tone={statusTone}>
+          {statusMessage}
+        </p>
 
         <div className="toolbar-actions">
           {isBusy && (
@@ -109,36 +93,19 @@ export function ActionBar(props: ActionBarProps) {
             </button>
           )}
 
-          {isConfirmVisible && (
-            <>
-              <button
-                type="button"
-                className="button button-quiet"
-                autoFocus
-                onClick={() => setIsConfirming(false)}
-              >
-                {messages.toolbar.cancel}
-              </button>
-              <button type="button" className="button button-primary" onClick={handleConfirm}>
-                <RemovalIcon size={16} strokeWidth={1.75} aria-hidden />
-                {removalLabel}
-              </button>
-            </>
-          )}
-
-          {isReviewing && unselectedFailedCount > 0 && (
+          {!isBusy && unselectedFailedCount > 0 && (
             <button type="button" className="button button-quiet" onClick={onSelectFailed}>
               {messages.toolbar.selectFailed(unselectedFailedCount)}
             </button>
           )}
 
-          {isReviewing && selectedCount > 0 && (
+          {!isBusy && selectedCount > 0 && (
             <button type="button" className="button button-quiet" onClick={onClearSelection}>
               {messages.toolbar.clearSelection}
             </button>
           )}
 
-          {isReviewing && (
+          {!isBusy && (
             <button
               type="button"
               className="button button-primary"
@@ -171,6 +138,15 @@ export function ActionBar(props: ActionBarProps) {
       )}
 
       <ProgressBar activity={activity} />
+
+      <ConfirmRemovalDialog
+        isOpen={isConfirming && selectedCount > 0 && !isBusy}
+        selectedCounts={selectedCounts}
+        confirmLabel={removalLabel}
+        confirmIcon={RemovalIcon}
+        onConfirm={handleConfirm}
+        onCancel={() => setIsConfirming(false)}
+      />
     </div>
   )
 }
