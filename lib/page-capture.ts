@@ -25,19 +25,20 @@ export interface CaptureResult {
   seenOperations: string[]
 }
 
-// Timelines de perfil só trazem itens do dono do perfil, então aceitar qualquer uma delas é seguro.
-const PROFILE_TIMELINE_OPERATIONS = [
+// Timelines de perfil e a pesquisa from:<dono> só trazem itens do dono, então aceitar qualquer uma delas é seguro.
+const OWNER_TIMELINE_OPERATIONS = [
   'UserTweets',
   'UserTweetsAndReplies',
   'UserOriginalsTimeline',
   'UserRepliesTimeline',
   'UserRepostsTimeline',
+  'SearchTimeline',
 ]
 
 const POST_CAPTURE_OPERATIONS: Record<PostCaptureMode, string[]> = {
-  posts: PROFILE_TIMELINE_OPERATIONS,
-  replies: PROFILE_TIMELINE_OPERATIONS,
-  reposts: PROFILE_TIMELINE_OPERATIONS,
+  posts: OWNER_TIMELINE_OPERATIONS,
+  replies: OWNER_TIMELINE_OPERATIONS,
+  reposts: OWNER_TIMELINE_OPERATIONS,
   likes: ['Likes', 'likesQuery'],
 }
 
@@ -127,7 +128,7 @@ const PEOPLE_OPERATION_FRAGMENTS: Record<PeopleCaptureMode, string> = {
   followers: 'Followers',
 }
 
-function isTimelineOperation(mode: CaptureMode, operationName: string): boolean {
+export function isTimelineOperation(mode: CaptureMode, operationName: string): boolean {
   if (mode === 'following' || mode === 'followers') {
     return operationName.includes(PEOPLE_OPERATION_FRAGMENTS[mode])
   }

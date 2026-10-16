@@ -7,13 +7,24 @@ import type { CapturedItem } from './items'
 import type { CaptureResult, XSession, XWebApp } from './page-capture'
 import { findOrOpenXTab, focusTab, navigateXTab, sendBridgeRequest, X_HOME_URL } from './x-tab'
 
+export type CaptureSource = 'profile' | 'search'
+
 export interface CaptureSection {
   target: CaptureTarget
+  source: CaptureSource
   step: number
   totalSteps: number
 }
 
+export interface CapturePage {
+  mode: CaptureMode
+  source: CaptureSource
+  url: string
+}
+
 type SectionUrlBuilder = (ownerHandle: string) => string
+
+type SearchQueryBuilder = (ownerHandle: string) => string
 
 type SectionStartHandler = (section: CaptureSection) => void
 
@@ -35,6 +46,13 @@ const SECTION_URL_BUILDERS: Record<XWebApp, Record<CaptureMode, SectionUrlBuilde
     following: ownerHandle => `https://x.com/${ownerHandle}/following`,
     followers: ownerHandle => `https://x.com/${ownerHandle}/followers`,
   },
+}
+
+// O X deixa parte dos posts de fora do perfil do próprio dono; a pesquisa from:<dono> usa outro índice e os encontra.
+const SEARCH_QUERY_BUILDERS: Partial<Record<CaptureMode, SearchQueryBuilder>> = {
+  posts: ownerHandle => `from:${ownerHandle} -filter:replies`,
+  replies: ownerHandle => `from:${ownerHandle} filter:replies`,
+  reposts: ownerHandle => `from:${ownerHandle} filter:nativeretweets`,
 }
 
 export async function captureItems(
@@ -62,6 +80,29 @@ export function selectCaptureModes(targets: CaptureTarget[]): CaptureMode[] {
 
 export function buildSectionUrl(mode: CaptureMode, session: XSession): string {
   return SECTION_URL_BUILDERS[session.app][mode](session.ownerHandle)
+}
+
+export function buildCapturePages(modes: CaptureMode[], session: XSession): CapturePage[] {
+  return modes.flatMap(mode => {
+    const profilePage: CapturePage = { mode, source: 'profile', url: buildSectionUrl(mode, session) }
+    const buildSearchQuery = SEARCH_QUERY_BUILDERS[mode]
+
+    if (!buildSearchQuery) {
+      return [profilePage]
+    }
+
+    const searchPage: CapturePage = {
+      mode,
+      source: 'search',
+      url: buildSearchUrl(buildSearchQuery(session.ownerHandle)),
+    }
+
+    return [profilePage, searchPage]
+  })
+}
+
+function buildSearchUrl(searchQuery: string): string {
+  return `https://x.com/search?q=${encodeURIComponent(searchQuery)}&src=typed_query&f=live`
 }
 
 async function captureFromTab(
@@ -94,15 +135,16 @@ async function captureFromTab(
     throw new XNotLoggedInError()
   }
 
-  const captureModes = selectCaptureModes(targets)
+  const capturePages = buildCapturePages(selectCaptureModes(targets), session)
 
-  for (const [index, mode] of captureModes.entries()) {
+  for (const [index, capturePage] of capturePages.entries()) {
     onSectionStart({
-      target: CAPTURE_MODE_TARGET[mode],
+      target: CAPTURE_MODE_TARGET[capturePage.mode],
+      source: capturePage.source,
       step: index + 1,
-      totalSteps: captureModes.length,
+      totalSteps: capturePages.length,
     })
-    await navigateXTab(tabId, buildSectionUrl(mode, session))
+    await navigateXTab(tabId, capturePage.url)
 
     if (signal.aborted) {
       return buildResult(true)
@@ -110,7 +152,7 @@ async function captureFromTab(
 
     const section = await sendBridgeRequest(tabId, {
       type: 'capture',
-      mode,
+      mode: capturePage.mode,
       ownerHandle: session.ownerHandle,
     })
 

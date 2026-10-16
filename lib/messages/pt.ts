@@ -155,6 +155,8 @@ export const pt: Messages = {
     openingX: 'Abrindo o X…',
     capturing: (kindLabel: string, step: number, totalSteps: number) =>
       `Capturando ${kindLabel} (${step} de ${totalSteps})… a aba do X rola sozinha.`,
+    capturingSearch: (kindLabel: string, step: number, totalSteps: number) =>
+      `Capturando ${kindLabel} pela pesquisa do X (${step} de ${totalSteps})… a aba do X rola sozinha.`,
     removing: (completed: number, total: number) => `Removendo ${completed} de ${total}`,
     timeLeft: (duration: string) => `cerca de ${duration} para terminar`,
     rateLimited: (resumeTime: string) => `limite do X atingido, retomando às ${resumeTime}`,

@@ -12,7 +12,10 @@ describe('describeActivity', () => {
 
   it('names the section being fetched and its position', () => {
     expect(
-      describeActivity({ type: 'capturing', section: { target: 'like', step: 2, totalSteps: 3 } }),
+      describeActivity({
+        type: 'capturing',
+        section: { target: 'like', source: 'profile', step: 2, totalSteps: 3 },
+      }),
     ).toBe('Fetching Likes (2 of 3)… the X tab scrolls by itself.')
   })
 
@@ -20,9 +23,18 @@ describe('describeActivity', () => {
     expect(
       describeActivity({
         type: 'capturing',
-        section: { target: 'following', step: 5, totalSteps: 5 },
+        section: { target: 'following', source: 'profile', step: 5, totalSteps: 5 },
       }),
     ).toBe('Fetching Following (5 of 5)… the X tab scrolls by itself.')
+  })
+
+  it('says when a section is fetched from the X search', () => {
+    expect(
+      describeActivity({
+        type: 'capturing',
+        section: { target: 'tweet', source: 'search', step: 2, totalSteps: 6 },
+      }),
+    ).toBe('Fetching Posts from the X search (2 of 6)… the X tab scrolls by itself.')
   })
 
   it('estimates the time left while removing', () => {

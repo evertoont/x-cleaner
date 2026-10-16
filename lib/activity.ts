@@ -104,11 +104,10 @@ function describeCapture(section: CaptureSection | undefined): string {
     return messages.activity.openingX
   }
 
-  return messages.activity.capturing(
-    describeCaptureTarget(section.target),
-    section.step,
-    section.totalSteps,
-  )
+  const describeSection =
+    section.source === 'search' ? messages.activity.capturingSearch : messages.activity.capturing
+
+  return describeSection(describeCaptureTarget(section.target), section.step, section.totalSteps)
 }
 
 function describeRemovalProgress(target: RemovalTarget, completed: number, total: number): string {

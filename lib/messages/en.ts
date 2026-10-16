@@ -153,6 +153,8 @@ export const en = {
     openingX: 'Opening X…',
     capturing: (kindLabel: string, step: number, totalSteps: number) =>
       `Fetching ${kindLabel} (${step} of ${totalSteps})… the X tab scrolls by itself.`,
+    capturingSearch: (kindLabel: string, step: number, totalSteps: number) =>
+      `Fetching ${kindLabel} from the X search (${step} of ${totalSteps})… the X tab scrolls by itself.`,
     removing: (completed: number, total: number) => `Removing ${completed} of ${total}`,
     timeLeft: (duration: string) => `about ${duration} left`,
     rateLimited: (resumeTime: string) => `X rate limit reached, resuming at ${resumeTime}`,
