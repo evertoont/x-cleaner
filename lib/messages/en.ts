@@ -1,0 +1,107 @@
+import { countOf } from './count-of'
+
+export const en = {
+  kinds: {
+    tweet: 'Posts',
+    reply: 'Replies',
+    retweet: 'Reposts',
+    like: 'Likes',
+  },
+  nav: {
+    label: 'Item types',
+    selectedCount: (count: number) => `${count} selected`,
+  },
+  sidebar: {
+    footnote: 'Runs in your browser and only talks to x.com.',
+  },
+  capture: {
+    heading: 'Fetch from X',
+    legend: 'What to fetch',
+    button: 'Fetch',
+    hint: 'The X tab scrolls by itself, then comes back here.',
+  },
+  list: {
+    emptyTitle: 'Nothing fetched yet',
+    emptyDescription: 'Pick what to fetch under Fetch from X, in the sidebar, then click Fetch.',
+    emptyKindTitle: (kindLabel: string) => `Nothing in ${kindLabel}`,
+    emptyKindDescription: 'Check this type under Fetch from X to fetch it again.',
+    openOnX: 'Open on X',
+    mediaOnly: 'No text, media only',
+    noDate: 'no date',
+    repostOf: (handle: string) => `Repost of @${handle}`,
+    replyingTo: (handle: string) => `Replying to @${handle}`,
+  },
+  toolbar: {
+    selectAll: 'Select all',
+    selectFailed: (count: number) => `Select ${count} failed`,
+    clearSelection: 'Clear selection',
+    stop: 'Stop',
+    cancel: 'Cancel',
+    technicalDetails: 'Technical details',
+    keepTabsOpen: 'Keep this tab and the X tab open until it finishes: items are removed through them.',
+  },
+  removal: {
+    button: {
+      delete: (count: number) => `Delete ${count}`,
+      undoRepost: (count: number) => `Undo ${countOf(count, 'repost', 'reposts')}`,
+      unlike: (count: number) => `Unlike ${count}`,
+      mixed: (count: number) => `Remove ${count}`,
+    },
+    confirmActions: {
+      tweet: (count: number) => `delete ${countOf(count, 'post', 'posts')}`,
+      reply: (count: number) => `delete ${countOf(count, 'reply', 'replies')}`,
+      retweet: (count: number) => `undo ${countOf(count, 'repost', 'reposts')}`,
+      like: (count: number) => `remove ${countOf(count, 'like', 'likes')}`,
+    },
+    confirm: (actionSummary: string) => `${actionSummary}? This can't be undone.`,
+    done: {
+      tweet: (count: number) => `${countOf(count, 'post', 'posts')} deleted`,
+      reply: (count: number) => `${countOf(count, 'reply', 'replies')} deleted`,
+      retweet: (count: number) => `${countOf(count, 'repost', 'reposts')} undone`,
+      like: (count: number) => `${countOf(count, 'like', 'likes')} removed`,
+    },
+    stopped: 'Stopped.',
+    nothingRemoved: 'Nothing was removed.',
+    failed: (count: number) =>
+      count === 1
+        ? '1 item failed and is still in the list.'
+        : `${count} items failed and are still in the list.`,
+  },
+  activity: {
+    openingX: 'Opening X…',
+    capturing: (kindLabel: string, step: number, totalSteps: number) =>
+      `Fetching ${kindLabel} (${step} of ${totalSteps})… the X tab scrolls by itself.`,
+    removing: (completed: number, total: number) => `Removing ${completed} of ${total}`,
+    timeLeft: (duration: string) => `about ${duration} left`,
+    rateLimited: (resumeTime: string) => `X rate limit reached, resuming at ${resumeTime}`,
+    removalMilestone: (percentDone: number) => `Removing: ${percentDone}% done`,
+  },
+  captureOutcome: {
+    fetched: (count: number) => `${countOf(count, 'item', 'items')} fetched.`,
+    stopped: 'Fetch stopped.',
+    nothingFound: (kindList: string) => `Nothing found in ${kindList}.`,
+    diagnostics: (responseCount: number, operations: string) =>
+      `Timeline responses read: ${responseCount}. Operations x.com sent: ${operations}.`,
+    noOperations: 'none',
+  },
+  overlay: {
+    capturing: (kindLabel: string) => `X Cleaner · fetching ${kindLabel}…`,
+    stopping: 'X Cleaner · stopping…',
+    stop: 'Stop fetching',
+  },
+  progress: {
+    capturing: 'Fetching',
+    removing: 'Removing',
+  },
+  errors: {
+    tabUnavailable: 'The x.com tab was closed or stopped responding. Try again.',
+    notLoggedIn: "Couldn't find your account on x.com. Log in and try again.",
+    sessionExpired: 'Your x.com session expired. Log in again and pick up where you left off.',
+    network: "Couldn't reach X. Check your connection.",
+    removalRejected: 'X refused the removal.',
+    removalHttpError: (httpStatus: number) => `X responded with error ${httpStatus}.`,
+    generic: 'Something went wrong. Try again.',
+  },
+}
+
+export type Messages = typeof en
