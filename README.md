@@ -129,6 +129,7 @@ If X changes something internal, the places to adjust are the `queryId`s in `lib
 |---|---|
 | `npm run dev` | Starts WXT in development mode with live reload |
 | `npm run build` | Builds the extension into `.output/chrome-mv3` |
+| `npm run zip` | Builds and packs the extension into a zip in `.output/` |
 | `npm run typecheck` | Type-checks the project |
 | `npm run lint` | Lints with ESLint |
 | `npm test` | Runs the unit tests |
