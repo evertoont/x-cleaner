@@ -1,13 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import {
-  countRemainingActions,
-  DAILY_ACCOUNT_ACTION_LIMIT,
-  findQuotaResumeTime,
-  listRecentActions,
-} from '../lib/account-quota'
+import { countRemainingActions, findQuotaResumeTime, listRecentActions } from '../lib/account-quota'
 
 const HOUR_MS = 60 * 60_000
 const NOW = Date.UTC(2026, 9, 16, 12)
+const DAILY_LIMIT = 10
 
 describe('listRecentActions', () => {
   it('keeps only actions from the last 24 hours, oldest first', () => {
@@ -19,15 +15,15 @@ describe('listRecentActions', () => {
 
 describe('countRemainingActions', () => {
   it('subtracts recent actions from the daily limit', () => {
-    expect(countRemainingActions([NOW - HOUR_MS, NOW - 30 * HOUR_MS], NOW)).toBe(
-      DAILY_ACCOUNT_ACTION_LIMIT - 1,
+    expect(countRemainingActions([NOW - HOUR_MS, NOW - 30 * HOUR_MS], NOW, DAILY_LIMIT)).toBe(
+      DAILY_LIMIT - 1,
     )
   })
 
   it('never goes below zero', () => {
-    const timestamps = Array.from({ length: DAILY_ACCOUNT_ACTION_LIMIT + 5 }, () => NOW - HOUR_MS)
+    const timestamps = Array.from({ length: DAILY_LIMIT + 5 }, () => NOW - HOUR_MS)
 
-    expect(countRemainingActions(timestamps, NOW)).toBe(0)
+    expect(countRemainingActions(timestamps, NOW, DAILY_LIMIT)).toBe(0)
   })
 })
 

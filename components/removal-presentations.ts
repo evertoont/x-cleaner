@@ -1,6 +1,6 @@
 import { HeartOff, Trash2, Undo2, UserMinus, UserX } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { DAILY_ACCOUNT_ACTION_LIMIT } from '../lib/account-quota'
+import { DAILY_ACCOUNT_ACTION_LIMITS } from '../lib/account-quota'
 import type { Account, AccountAction } from '../lib/accounts'
 import { estimateRemovalDuration } from '../lib/activity'
 import { messages } from '../lib/i18n'
@@ -65,7 +65,11 @@ export function presentAccountRemoval(
   selectedAccounts: Account[],
 ): RemovalPresentation {
   const selectedCount = selectedAccounts.length
-  const countProcessedToday = Math.min(selectedCount, DAILY_ACCOUNT_ACTION_LIMIT)
+  const dailyLimit = DAILY_ACCOUNT_ACTION_LIMITS[action]
+  const countProcessedToday =
+    dailyLimit === undefined ? selectedCount : Math.min(selectedCount, dailyLimit)
+  const dailyLimitNotes =
+    dailyLimit === undefined ? [] : [messages.accountRemoval.dailyLimit(dailyLimit)]
   const actionMessages = messages.accountActions[action]
 
   return {
@@ -75,7 +79,7 @@ export function presentAccountRemoval(
     dialogLines: describePreviewedAccounts(selectedAccounts, ACCOUNT_ACTION_ICONS[action]),
     dialogNotes: [
       messages.accountRemoval.duration(estimateRemovalDuration(countProcessedToday, action)),
-      messages.accountRemoval.dailyLimit(DAILY_ACCOUNT_ACTION_LIMIT),
+      ...dailyLimitNotes,
       actionMessages.effect,
     ],
   }

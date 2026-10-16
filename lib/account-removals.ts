@@ -1,4 +1,9 @@
-import { countRemainingActions, findQuotaResumeTime, listRecentActions } from './account-quota'
+import {
+  countRemainingActions,
+  DAILY_ACCOUNT_ACTION_LIMITS,
+  findQuotaResumeTime,
+  listRecentActions,
+} from './account-quota'
 import type { Account, AccountAction } from './accounts'
 import type { RemovalBridgeRequest } from './bridge-messages'
 import { accountActionLogStorages } from './item-storage'
@@ -25,8 +30,15 @@ export async function planAccountRemovals(
   selectedAccounts: Account[],
 ): Promise<AccountRemovalPlan> {
   const now = Date.now()
+  const dailyLimit = DAILY_ACCOUNT_ACTION_LIMITS[action]
+
+  if (dailyLimit === undefined) {
+    return { accountsToProcess: selectedAccounts, heldBackCount: 0, quotaResumeAt: new Date(now) }
+  }
+
   const actionLog = await accountActionLogStorages[action].getValue()
-  const accountsToProcess = selectedAccounts.slice(0, countRemainingActions(actionLog, now))
+  const remainingCount = countRemainingActions(actionLog, now, dailyLimit)
+  const accountsToProcess = selectedAccounts.slice(0, remainingCount)
 
   return {
     accountsToProcess,
