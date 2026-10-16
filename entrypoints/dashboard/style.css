@@ -340,7 +340,7 @@ input[type='checkbox']:disabled {
   display: flex;
   align-items: baseline;
   gap: 10px;
-  padding: 36px 0 10px;
+  padding: 36px 0 2px;
 }
 
 .content-header h1 {
@@ -360,8 +360,19 @@ input[type='checkbox']:disabled {
   position: sticky;
   top: 0;
   z-index: 2;
-  border-bottom: 1px solid var(--border-subtle);
+  margin: 0 -14px;
+  padding-top: 12px;
   background: var(--surface-content);
+}
+
+.toolbar-panel {
+  position: relative;
+  overflow: hidden;
+  padding: 0 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  background: var(--surface-raised);
+  box-shadow: 0 8px 24px oklch(0.1 0.02 305 / 0.3);
 }
 
 .toolbar-row {
@@ -445,7 +456,7 @@ input[type='checkbox']:disabled {
 .progress {
   position: absolute;
   right: 0;
-  bottom: -1px;
+  bottom: 0;
   left: 0;
   height: 2px;
   overflow: hidden;
@@ -581,7 +592,7 @@ input[type='checkbox']:disabled {
 
 .item-list {
   margin: 0;
-  padding: 6px 0 0;
+  padding: 10px 0 0;
   list-style: none;
 }
 
@@ -715,7 +726,7 @@ input[type='checkbox']:disabled {
   display: inline-flex;
   flex-wrap: wrap;
   gap: 2px;
-  margin: 0 0 6px;
+  margin: 12px 0 0;
   padding: 3px;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-pill);
