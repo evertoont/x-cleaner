@@ -1,3 +1,4 @@
+import { decodeHtmlEntities } from './html-entities'
 import { createItem } from './items'
 import type { CapturedItem, ItemKind } from './items'
 
@@ -46,14 +47,6 @@ interface ParsedTweet extends RawTweet {
 }
 
 const TWEET_RESULTS_FIELD = 'tweet_results'
-
-const HTML_ENTITIES: Record<string, string> = {
-  '&amp;': '&',
-  '&lt;': '<',
-  '&gt;': '>',
-  '&quot;': '"',
-  '&#39;': "'",
-}
 
 export function parseTimelineResponse(
   body: unknown,
@@ -206,7 +199,7 @@ function readText(tweet: RawTweet): string {
     tweet.legacy?.full_text ??
     ''
 
-  return text.replace(/&(amp|lt|gt|quot|#39);/g, entity => HTML_ENTITIES[entity] ?? entity)
+  return decodeHtmlEntities(text)
 }
 
 function readCreatedAt(tweet: RawTweet): string {
