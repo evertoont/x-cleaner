@@ -4,6 +4,11 @@ import type { ItemKind, KindCounts, RemovalAction } from './items'
 
 export type RemovalButtonAction = RemovalAction | 'mixed'
 
+export interface RemovalActionLine {
+  kind: ItemKind
+  description: string
+}
+
 export function selectRemovalAction(
   selectedCounts: KindCounts,
   activeKind: ItemKind,
@@ -18,6 +23,13 @@ export function selectRemovalAction(
   }
 
   return selectedActions.size === 1 ? firstAction : 'mixed'
+}
+
+export function describeRemovalActions(selectedCounts: KindCounts): RemovalActionLine[] {
+  return listCountedKinds(selectedCounts).map(kind => ({
+    kind,
+    description: capitalizeFirstLetter(messages.removal.confirmActions[kind](selectedCounts[kind])),
+  }))
 }
 
 export function describeRemovalConfirmation(selectedCounts: KindCounts): string {

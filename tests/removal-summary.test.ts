@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { KindCounts } from '../lib/items'
 import {
-  describeRemovalConfirmation,
+  describeRemovalActions,
   describeRemovalOutcome,
   selectRemovalAction,
 } from '../lib/removal-summary'
@@ -29,11 +29,13 @@ describe('selectRemovalAction', () => {
   })
 })
 
-describe('describeRemovalConfirmation', () => {
-  it('spells out every selected kind with its own action', () => {
-    expect(describeRemovalConfirmation(buildCounts({ tweet: 12, retweet: 1, like: 30 }))).toBe(
-      "Delete 12 posts, undo 1 repost, and remove 30 likes? This can't be undone.",
-    )
+describe('describeRemovalActions', () => {
+  it('lists every selected kind with its own action', () => {
+    expect(describeRemovalActions(buildCounts({ tweet: 12, retweet: 1, like: 30 }))).toEqual([
+      { kind: 'tweet', description: 'Delete 12 posts' },
+      { kind: 'retweet', description: 'Undo 1 repost' },
+      { kind: 'like', description: 'Remove 30 likes' },
+    ])
   })
 })
 
