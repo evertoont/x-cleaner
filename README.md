@@ -24,7 +24,7 @@ It works with your normal x.com session. There is no account to create, no serve
 
 ## Features
 
-- **Fetch** your posts, replies, reposts, likes, following and followers straight from x.com. The X tab scrolls through your profile by itself.
+- **Fetch** your posts, replies, reposts, likes, following and followers straight from x.com. The X tab scrolls through your profile by itself, then through an X search for your posts, replies and reposts, since X leaves some of them off your own profile.
 - **Read before you remove.** Every item shows its date, context and full text, with a link back to X.
 - **Select with confidence.** Select item by item or a whole tab at once; the sidebar shows how many items are selected in each type.
 - **Clear confirmation.** A dialog lists what will happen for each type ("Delete 12 posts", "Remove 30 likes"), how long it will take and that it is permanent.
@@ -92,6 +92,7 @@ Then click the reload button on the X Cleaner card in `chrome://extensions`.
 ## Known limitations
 
 - X may not load your oldest likes. This is a limitation of X itself.
+- Some posts appear neither on your profile nor in X search, so X Cleaner can't find them. The post count on your profile may stay above zero because of them.
 - X does not publish limits for unfollows or follower removals. The 250-per-day unfollow cap is a conservative choice to avoid looking automated, not an official number.
 - X changes its internal web API from time to time. If a fetch comes back empty, open **Technical details** below the toolbar and include that text when you open an issue.
 
@@ -107,7 +108,7 @@ flowchart LR
   bridge -- "items and results" --> dashboard
 ```
 
-- **Fetching:** a script running in the x.com page forwards the GraphQL responses the site already loads while you scroll. The bridge script scrolls until the timeline ends and turns those responses into items.
+- **Fetching:** a script running in the x.com page forwards the GraphQL responses the site already loads while you scroll. The bridge script scrolls until the timeline ends and turns those responses into items. For posts, replies and reposts it then does the same on an X search (`from:<you>`, with `-filter:replies`, `filter:replies` or `filter:nativeretweets`), because X leaves some of your own posts off your profile. Items found in both places are listed once.
 - **Removing:** the bridge calls X's internal mutations with your logged-in session, one item at a time, 2 to 3 seconds apart: `DeleteTweet` for posts, replies and reposts (`DeleteRetweet` when only the original post is known) and `UnfavoriteTweet` for likes.
 - **People:** fetching **Following** and **Followers** scrolls `x.com/<you>/following` and `x.com/<you>/followers`; each account comes with both sides of the relationship, so one pass per list is enough. Unfollowing calls `friendships/destroy` and removing a follower calls the `RemoveFollower` mutation, with the same session.
 - **Dashboard:** an extension page that drives the x.com tab while fetching and keeps the list.
