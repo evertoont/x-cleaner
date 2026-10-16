@@ -10,7 +10,76 @@ export const pt: Messages = {
   },
   nav: {
     label: 'Tipos de item',
+    activityHeading: 'Atividade',
+    peopleHeading: 'Pessoas',
     selectedCount: (count: number) => countOf(count, 'selecionado', 'selecionados'),
+  },
+  people: {
+    captureTargets: {
+      following: 'Seguindo',
+      followers: 'Seguidores',
+    },
+    lists: {
+      nonFollowers: {
+        title: 'Não te seguem de volta',
+        emptyTitle: 'Ninguém listado ainda',
+        emptyDescription:
+          'Marque Seguindo em Capturar do X e clique em Capturar para ver quem não te segue de volta.',
+      },
+      followers: {
+        title: 'Seguidores',
+        emptyTitle: 'Nenhum seguidor listado ainda',
+        emptyDescription:
+          'Marque Seguidores em Capturar do X e clique em Capturar para listar quem te segue.',
+      },
+    },
+    sortLabel: 'Ordenar por',
+    sorts: {
+      recent: 'Mais recentes primeiro',
+      mostFollowers: 'Mais seguidores',
+      fewestFollowers: 'Menos seguidores',
+    },
+    followerCount: (count: number, formattedCount: string) =>
+      count === 1 ? '1 seguidor' : `${formattedCount} seguidores`,
+    followingCount: (formattedCount: string) => `${formattedCount} seguindo`,
+    mutual: 'Vocês se seguem',
+    notFollowedBack: 'Você não segue de volta',
+    verified: 'Verificado',
+    openProfile: 'Abrir perfil no X',
+    moreAccounts: (count: number) => `e mais ${count}`,
+  },
+  accountActions: {
+    unfollow: {
+      button: (count: number) => `Deixar de seguir ${count}`,
+      dialogTitle: (count: number) => `Deixar de seguir ${countOf(count, 'conta', 'contas')}?`,
+      effect: 'Você pode voltar a seguir pelo X quando quiser.',
+      done: (count: number) => `Você deixou de seguir ${countOf(count, 'conta', 'contas')}.`,
+      nobody: 'Nenhum unfollow foi feito.',
+      progress: (completed: number, total: number) => `Deixando de seguir ${completed} de ${total}`,
+      milestone: (percentDone: number) => `Deixando de seguir: ${percentDone}% concluído`,
+    },
+    removeFollower: {
+      button: (count: number) => `Remover ${count}`,
+      dialogTitle: (count: number) => `Remover ${countOf(count, 'seguidor', 'seguidores')}?`,
+      effect: 'A pessoa não é avisada, mas pode voltar a te seguir.',
+      done: (count: number) => `${countOf(count, 'seguidor removido', 'seguidores removidos')}.`,
+      nobody: 'Nenhum seguidor foi removido.',
+      progress: (completed: number, total: number) => `Removendo seguidores ${completed} de ${total}`,
+      milestone: (percentDone: number) => `Removendo seguidores: ${percentDone}% concluído`,
+    },
+  },
+  accountRemoval: {
+    duration: (duration: string) => `Leva cerca de ${duration}, em ritmo lento para proteger sua conta.`,
+    dailyLimit: (limit: number) =>
+      `O X Cleaner para depois de ${limit} por dia; o restante fica selecionado para depois.`,
+    failed: (count: number) =>
+      count === 1
+        ? '1 conta falhou e continua na lista.'
+        : `${count} contas falharam e continuam na lista.`,
+    heldBack: (count: number, resumeTime: string) =>
+      `Limite diário atingido: ${countOf(count, 'conta continua selecionada', 'contas continuam selecionadas')}. Continue depois de ${resumeTime}.`,
+    limitReached: (resumeTime: string) =>
+      `Você atingiu o limite de hoje para esta ação. Continue depois de ${resumeTime}.`,
   },
   sidebar: {
     footnote: 'Roda no seu navegador e só conversa com o x.com.',

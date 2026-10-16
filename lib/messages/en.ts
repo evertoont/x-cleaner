@@ -9,7 +9,75 @@ export const en = {
   },
   nav: {
     label: 'Item types',
+    activityHeading: 'Activity',
+    peopleHeading: 'People',
     selectedCount: (count: number) => `${count} selected`,
+  },
+  people: {
+    captureTargets: {
+      following: 'Following',
+      followers: 'Followers',
+    },
+    lists: {
+      nonFollowers: {
+        title: 'Not following back',
+        emptyTitle: 'Nobody listed yet',
+        emptyDescription:
+          "Check Following under Fetch from X, then click Fetch to find who doesn't follow you back.",
+      },
+      followers: {
+        title: 'Followers',
+        emptyTitle: 'No followers listed yet',
+        emptyDescription: 'Check Followers under Fetch from X, then click Fetch to list who follows you.',
+      },
+    },
+    sortLabel: 'Sort by',
+    sorts: {
+      recent: 'Newest first',
+      mostFollowers: 'Most followers',
+      fewestFollowers: 'Fewest followers',
+    },
+    followerCount: (count: number, formattedCount: string) =>
+      count === 1 ? '1 follower' : `${formattedCount} followers`,
+    followingCount: (formattedCount: string) => `${formattedCount} following`,
+    mutual: 'You follow each other',
+    notFollowedBack: "You don't follow back",
+    verified: 'Verified',
+    openProfile: 'Open profile on X',
+    moreAccounts: (count: number) => `and ${count} more`,
+  },
+  accountActions: {
+    unfollow: {
+      button: (count: number) => `Unfollow ${count}`,
+      dialogTitle: (count: number) => `Unfollow ${countOf(count, 'account', 'accounts')}?`,
+      effect: 'You can follow them again on X at any time.',
+      done: (count: number) => `${countOf(count, 'account', 'accounts')} unfollowed.`,
+      nobody: 'Nobody was unfollowed.',
+      progress: (completed: number, total: number) => `Unfollowing ${completed} of ${total}`,
+      milestone: (percentDone: number) => `Unfollowing: ${percentDone}% done`,
+    },
+    removeFollower: {
+      button: (count: number) => `Remove ${count}`,
+      dialogTitle: (count: number) => `Remove ${countOf(count, 'follower', 'followers')}?`,
+      effect: "They won't be notified, but they can follow you again.",
+      done: (count: number) => `${countOf(count, 'follower', 'followers')} removed.`,
+      nobody: 'No follower was removed.',
+      progress: (completed: number, total: number) => `Removing followers ${completed} of ${total}`,
+      milestone: (percentDone: number) => `Removing followers: ${percentDone}% done`,
+    },
+  },
+  accountRemoval: {
+    duration: (duration: string) => `Takes about ${duration}, at a slow pace to protect your account.`,
+    dailyLimit: (limit: number) =>
+      `X Cleaner stops after ${limit} a day; the rest stay selected for later.`,
+    failed: (count: number) =>
+      count === 1
+        ? '1 account failed and is still in the list.'
+        : `${count} accounts failed and are still in the list.`,
+    heldBack: (count: number, resumeTime: string) =>
+      `Daily limit reached: ${countOf(count, 'account stays', 'accounts stay')} selected. Continue after ${resumeTime}.`,
+    limitReached: (resumeTime: string) =>
+      `You reached today's limit for this action. Continue after ${resumeTime}.`,
   },
   sidebar: {
     footnote: 'Runs in your browser and only talks to x.com.',
