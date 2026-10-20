@@ -97,6 +97,12 @@ export const pt: Messages = {
     button: 'Capturar',
     hint: 'A aba do X rola sozinha e depois volta para cá.',
   },
+  archive: {
+    heading: 'Arquivo do X',
+    button: 'Importar tweets.js',
+    hint: 'Do arquivo de dados que o X envia (data/tweets.js). Traz o que o perfil e a pesquisa deixam de fora.',
+    imported: (count: number) => `${countOf(count, 'item lido', 'itens lidos')} do arquivo.`,
+  },
   list: {
     emptyTitle: 'Nada capturado ainda',
     emptyDescription: 'Escolha o que buscar em Capturar do X, na barra ao lado, e clique em Capturar.',
@@ -190,6 +196,8 @@ export const pt: Messages = {
     network: 'Não foi possível falar com o X. Verifique sua conexão.',
     removalRejected: 'O X recusou a remoção.',
     removalHttpError: (httpStatus: number) => `O X respondeu com erro ${httpStatus}.`,
+    archiveFileInvalid: (fileName: string) =>
+      `${fileName} não parece ser o tweets.js do arquivo do X.`,
     generic: 'Algo deu errado. Tente de novo.',
   },
 }

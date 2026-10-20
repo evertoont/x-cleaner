@@ -30,6 +30,13 @@ export class XAccountLockedError extends XCleanerError {
   }
 }
 
+export class ArchiveFileInvalidError extends XCleanerError {
+  constructor(fileName: string) {
+    super(messages.errors.archiveFileInvalid(fileName))
+    this.name = 'ArchiveFileInvalidError'
+  }
+}
+
 export function describeError(error: unknown): string {
   if (error instanceof XCleanerError) {
     return error.message

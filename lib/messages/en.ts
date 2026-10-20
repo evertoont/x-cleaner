@@ -95,6 +95,12 @@ export const en = {
     button: 'Fetch',
     hint: 'The X tab scrolls by itself, then comes back here.',
   },
+  archive: {
+    heading: 'X archive',
+    button: 'Import tweets.js',
+    hint: 'From the data archive X sends you (data/tweets.js). Lists what your profile and search leave out.',
+    imported: (count: number) => `${countOf(count, 'item', 'items')} read from the archive.`,
+  },
   list: {
     emptyTitle: 'Nothing fetched yet',
     emptyDescription: 'Pick what to fetch under Fetch from X, in the sidebar, then click Fetch.',
@@ -187,6 +193,8 @@ export const en = {
     network: "Couldn't reach X. Check your connection.",
     removalRejected: 'X refused the removal.',
     removalHttpError: (httpStatus: number) => `X responded with error ${httpStatus}.`,
+    archiveFileInvalid: (fileName: string) =>
+      `${fileName} doesn't look like tweets.js from your X archive.`,
     generic: 'Something went wrong. Try again.',
   },
 }

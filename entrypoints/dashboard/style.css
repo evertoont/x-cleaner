@@ -260,6 +260,11 @@ input[type='checkbox']:disabled {
   font-size: 12px;
 }
 
+.archive-panel {
+  display: flex;
+  flex-direction: column;
+}
+
 .sidebar-footnote {
   margin: -12px 12px 0;
   color: var(--text-tertiary);

@@ -3,6 +3,7 @@ import { useMemo, useRef, useState } from 'react'
 import { AccountList } from '../../components/AccountList'
 import { AccountSortSelect } from '../../components/AccountSortSelect'
 import { ActionBar } from '../../components/ActionBar'
+import { ArchiveImport } from '../../components/ArchiveImport'
 import { CaptureControls } from '../../components/CaptureControls'
 import { FollowerFilterControl } from '../../components/FollowerFilterControl'
 import { ItemList } from '../../components/ItemList'
@@ -24,6 +25,7 @@ import {
 } from '../../lib/accounts'
 import type { Account, AccountSort, FollowerFilter, PeopleList } from '../../lib/accounts'
 import type { Activity, Notice } from '../../lib/activity'
+import { mergeArchiveItems, readArchiveFiles } from '../../lib/archive-import'
 import { captureItems } from '../../lib/capture-items'
 import { CAPTURE_TARGETS, describeCaptureTarget, isItemKind } from '../../lib/capture-modes'
 import type { CaptureTarget } from '../../lib/capture-modes'
@@ -160,6 +162,22 @@ export function App() {
     }
   }
 
+  async function handleImportArchive(archiveFiles: File[]) {
+    setNotice(null)
+    void clearRemovalNotice()
+
+    try {
+      const archiveItems = await readArchiveFiles(archiveFiles)
+
+      await replaceItems(currentItems => mergeArchiveItems(currentItems, archiveItems))
+      postSelection.clearSelection()
+      setNotice({ message: messages.archive.imported(archiveItems.length), tone: 'info' })
+    } catch (error) {
+      console.error(error)
+      setNotice({ message: describeError(error), tone: 'error' })
+    }
+  }
+
   async function handleRemovePosts(isBackgroundRun: boolean) {
     setNotice(null)
     await startRemovalJob(createItemRemovalJob(selectedItems, isBackgroundRun))
@@ -262,6 +280,8 @@ export function App() {
           onToggleTarget={handleToggleCaptureTarget}
           onCapture={handleCapture}
         />
+
+        <ArchiveImport isBusy={isBusy} onImport={handleImportArchive} />
 
         <p className="sidebar-footnote">{messages.sidebar.footnote}</p>
       </aside>
