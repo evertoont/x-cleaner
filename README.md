@@ -25,6 +25,7 @@ It works with your normal x.com session. There is no account to create, no serve
 ## Features
 
 - **Fetch** your posts, replies, reposts, likes, following and followers straight from x.com. The X tab scrolls through your profile by itself, then through an X search for your posts, replies and reposts, since X leaves some of them off your own profile.
+- **Import your X archive.** Some posts show up neither on your profile nor in X search. Import `tweets.js` from the data archive X sends you to list every post, reply and repost still on your account.
 - **Read before you remove.** Every item shows its date, context and full text, with a link back to X.
 - **Select with confidence.** Select item by item or a whole tab at once; the sidebar shows how many items are selected in each type.
 - **Clear confirmation.** A dialog lists what will happen for each type ("Delete 12 posts", "Remove 30 likes"), how long it will take and that it is permanent.
@@ -83,6 +84,9 @@ Then click the reload button on the X Cleaner card in `chrome://extensions`.
 > [!TIP]
 > A new fetch only replaces the types you checked. If you stop a fetch halfway, what was found so far is added to the list and nothing else is touched.
 
+> [!TIP]
+> **To remove everything,** request your archive on X (**Settings → Your account → Download an archive of your data**). X can take a few days to prepare it. Unzip it, click **Import tweets.js** under **X archive** and pick `data/tweets.js` (plus any `tweets-part1.js` and later parts). Its items are added to the list without replacing anything; a later fetch replaces the types you check, including what came from the archive.
+
 ## Privacy
 
 - Everything runs in your browser. There is no backend, analytics or tracking.
@@ -92,7 +96,7 @@ Then click the reload button on the X Cleaner card in `chrome://extensions`.
 ## Known limitations
 
 - X may not load your oldest likes. This is a limitation of X itself.
-- Some posts appear neither on your profile nor in X search, so X Cleaner can't find them. The post count on your profile may stay above zero because of them.
+- Some posts appear neither on your profile nor in X search, so a fetch can't find them and the post count on your profile may stay above zero. Import `tweets.js` from your X archive to list them.
 - X does not publish limits for unfollows or follower removals. The 250-per-day unfollow cap is a conservative choice to avoid looking automated, not an official number.
 - X changes its internal web API from time to time. If a fetch comes back empty, open **Technical details** below the toolbar and include that text when you open an issue.
 
@@ -109,6 +113,7 @@ flowchart LR
 ```
 
 - **Fetching:** a script running in the x.com page forwards the GraphQL responses the site already loads while you scroll. The bridge script scrolls until the timeline ends and turns those responses into items. For posts, replies and reposts it then does the same on an X search (`from:<you>`, with `-filter:replies`, `filter:replies` or `filter:nativeretweets`), because X leaves some of your own posts off your profile. Items found in both places are listed once.
+- **Archive:** the dashboard reads `tweets.js` locally and turns each entry into an item: text starting with `RT @` is a repost, an entry with `in_reply_to_status_id_str` is a reply, the rest are posts. Reposts from the archive carry their own ID, so they are removed with `DeleteTweet`.
 - **Removing:** the bridge calls X's internal mutations with your logged-in session, one item at a time, 2 to 3 seconds apart: `DeleteTweet` for posts, replies and reposts (`DeleteRetweet` when only the original post is known) and `UnfavoriteTweet` for likes.
 - **People:** fetching **Following** and **Followers** scrolls `x.com/<you>/following` and `x.com/<you>/followers`; each account comes with both sides of the relationship, so one pass per list is enough. Unfollowing calls `friendships/destroy` and removing a follower calls the `RemoveFollower` mutation, with the same session.
 - **Dashboard:** an extension page that drives the x.com tab while fetching and keeps the list.
